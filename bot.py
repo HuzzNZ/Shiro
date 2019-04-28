@@ -143,14 +143,14 @@ class Shiro(commands.Bot):
         Role = namedtuple("Role", "kitsune member spacer_pings spacer_special "
                                   "news_server news_anime disc_anime disc_manga")
 
-        kitsune = self.senko_guild.get_role(id=int(self.role_ids["kitsune"]))
-        member = self.senko_guild.get_role(id=int(self.role_ids["member"]))
-        spacer_pings = self.senko_guild.get_role(id=int(self.role_ids["spacer-pings"]))
-        spacer_special = self.senko_guild.get_role(id=int(self.role_ids["spacer-special"]))
-        news_server = self.senko_guild.get_role(id=int(self.role_ids["news-server"]))
-        news_anime = self.senko_guild.get_role(id=int(self.role_ids["news-anime"]))
-        disc_anime = self.senko_guild.get_role(id=int(self.role_ids["disc-anime"]))
-        disc_manga = self.senko_guild.get_role(id=int(self.role_ids["disc-manga"]))
+        kitsune = self.senko_guild.get_role(int(self.role_ids["kitsune"]))
+        member = self.senko_guild.get_role(int(self.role_ids["member"]))
+        spacer_pings = self.senko_guild.get_role(int(self.role_ids["spacer-pings"]))
+        spacer_special = self.senko_guild.get_role(int(self.role_ids["spacer-special"]))
+        news_server = self.senko_guild.get_role(int(self.role_ids["news-server"]))
+        news_anime = self.senko_guild.get_role(int(self.role_ids["news-anime"]))
+        disc_anime = self.senko_guild.get_role(int(self.role_ids["disc-anime"]))
+        disc_manga = self.senko_guild.get_role(int(self.role_ids["disc-manga"]))
 
         self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
                           disc_manga)
