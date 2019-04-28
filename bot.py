@@ -155,6 +155,8 @@ class Shiro(commands.Bot):
                           disc_manga)
 
         print(isinstance(member, discord.Role))
+        print(isinstance(spacer_pings, discord.Role))
+        print(isinstance(spacer_special, discord.Role))
 
     # ======================== #
     #                          #
