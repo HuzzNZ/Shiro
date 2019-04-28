@@ -37,7 +37,7 @@ class Shiro(commands.Bot):
         self.base_path = os.path.abspath("bot.py")
 
         # Finding File Directories
-        if self.on_windows:
+        if self.on_windows or "Shiro" in self.base_path:
             in_folder = ""
         else:
             in_folder = "Shiro"

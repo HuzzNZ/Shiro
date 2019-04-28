@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="87de8882-d2f9-400e-b36f-6022a9f81854" name="Default Changelist" comment="" />
+    <list default="true" id="87de8882-d2f9-400e-b36f-6022a9f81854" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +18,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1030">
-              <caret line="396" column="32" lean-forward="true" selection-start-line="396" selection-start-column="32" selection-end-line="396" selection-end-column="32" />
+            <state relative-caret-position="274">
+              <caret line="40" column="26" lean-forward="true" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="26" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
                 <element signature="e#804#893#0" />
@@ -236,12 +238,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1556438056064</updated>
-      <workItem from="1556438057979" duration="17472000" />
+      <workItem from="1556438057979" duration="18082000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17472000" />
+    <option name="totallyTimeSpent" value="18082000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="82" y="-6" width="1845" height="1093" extended-state="6" />
@@ -267,7 +269,7 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="2" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="3" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
-      <window_info active="true" anchor="right" id="Run" order="5" visible="true" weight="0.37045327" />
+      <window_info anchor="right" id="Run" order="5" weight="0.37045327" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -360,8 +362,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/bot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1030">
-          <caret line="396" column="32" lean-forward="true" selection-start-line="396" selection-start-column="32" selection-end-line="396" selection-end-column="32" />
+        <state relative-caret-position="274">
+          <caret line="40" column="26" lean-forward="true" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="26" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
             <element signature="e#804#893#0" />
