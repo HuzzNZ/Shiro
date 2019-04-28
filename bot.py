@@ -145,7 +145,7 @@ class Shiro(commands.Bot):
         kitsune = get(self.senko_guild.roles, id=int(self.role_ids["kitsune"]))
         member = get(self.senko_guild.roles, id=int(self.role_ids["member"]))
         spacer_pings = get(self.senko_guild.roles, id=int(self.role_ids["spacer-pings"]))
-        spacer_special = get(self.senko_guild.roles, id=int(self.role_ids["spacer-special"]))
+        spacer_special = get(self.senko_guild.roles, id=572052449658142721)
         news_server = get(self.senko_guild.roles, id=int(self.role_ids["news-server"]))
         news_anime = get(self.senko_guild.roles, id=int(self.role_ids["news-anime"]))
         disc_anime = get(self.senko_guild.roles, id=int(self.role_ids["disc-anime"]))
@@ -380,6 +380,8 @@ class Shiro(commands.Bot):
 
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
+
+    async def on_connect(self):
         self.loop.create_task(self.on_time_loop())
 
     async def on_disconnect(self):
