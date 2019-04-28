@@ -94,8 +94,7 @@ class Shiro(commands.Bot):
 
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
-        self.loop.run_until_complete(self.login(token=self.token))
-        self.loop.run_until_complete(self.connect(reconnect=True))
+        self.run(self.token)
 
     @staticmethod
     def send_log(title: str, message: str):

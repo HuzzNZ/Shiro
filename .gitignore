@@ -8,3 +8,5 @@ tracking\.json
 tracking_msg\.json
 
 logs/
+
+__pycache__/
