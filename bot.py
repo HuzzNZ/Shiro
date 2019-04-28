@@ -74,7 +74,6 @@ class Shiro(commands.Bot):
 
         # Starting the bot
         self.send_log("Bot Client", "Starting process")
-        self.loop.create_task(self.on_time_loop())
 
         if not sys.platform == "win32":
             self.loop.add_signal_handler(signal.SIGINT, lambda: self.loop.stop())
@@ -381,7 +380,7 @@ class Shiro(commands.Bot):
 
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
-        print(self.guilds)
+        self.loop.create_task(self.on_time_loop())
 
     async def on_disconnect(self):
         self.send_log("Bot Client", "Disconnected")
