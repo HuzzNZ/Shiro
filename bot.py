@@ -154,9 +154,9 @@ class Shiro(commands.Bot):
         self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
                           disc_manga)
 
-        print(isinstance(member, discord.Role))
-        print(isinstance(spacer_pings, discord.Role))
-        print(isinstance(spacer_special, discord.Role))
+        print(isinstance(self.roles.member, discord.Role))
+        print(isinstance(self.roles.spacer_pings, discord.Role))
+        print(isinstance(self.roles.spacer_special, discord.Role))
 
     # ======================== #
     #                          #
