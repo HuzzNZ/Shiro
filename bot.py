@@ -25,6 +25,15 @@ import os
 
 from docs import Docs
 
+import logging
+
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
+
 
 class Shiro(commands.Bot):
     def __init__(self):
@@ -350,7 +359,7 @@ class Shiro(commands.Bot):
         self.send_log("...", "Refreshing Presence")
         await self.refresh_presence()
         self.send_log("...", "!! Startup Process Finished !!")
-        while True:
+        while True and not self.is_closed():
             try:
                 counter += 1
                 ticks += 1
@@ -384,9 +393,6 @@ class Shiro(commands.Bot):
 
     async def on_connect(self):
         await asyncio.ensure_future(self.on_time_loop())
-
-    async def on_disconnect(self):
-        self.send_log("Bot Client", "Disconnected")
 
     async def on_message(self, message):
         print(message.content)
