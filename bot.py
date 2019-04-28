@@ -1,33 +1,35 @@
+# Discord
 import discord
 from discord.ext import commands
 from discord.utils import get
+import logging
 
-from datetime import datetime
 
-import asyncio
-
-import signal
-
-import sys
-
+# Local Scripts
 from anilist_api import find_anime_by_id
 from anilist_api import find_manga_by_id
 from anilist_api import find_anime_by_name
 from anilist_api import find_manga_by_name
-
 from util import build_next_ep_embed
 from util import time_diff
 from util import strfdelta
+from docs import Docs
 
+
+# Python Built-ins
 from collections import namedtuple
 import json
 import os
+from datetime import datetime
+import signal
+import sys
 
-from docs import Docs
 
-import logging
+# asyncio
+import asyncio
 
 
+# Logging
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w')
@@ -35,6 +37,7 @@ handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(me
 logger.addHandler(handler)
 
 
+# Main Bot class definition
 class Shiro(commands.Bot):
     def __init__(self):
         # Inheriting discord.Client class
@@ -90,6 +93,7 @@ class Shiro(commands.Bot):
             self.loop.add_signal_handler(signal.SIGTERM, lambda: self.loop.stop())
 
         self.start_time = datetime.utcnow()
+        self.load_extension("cogs.commands")
         self.loop.run_until_complete(self.login(token=self.token))
         self.loop.run_until_complete(self.connect(reconnect=True))
 
@@ -348,18 +352,19 @@ class Shiro(commands.Bot):
         ticks = 0
         await self.wait_until_ready()
         await self.define_constants()
+        await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
         self.send_log("...", "Refreshing 24h")
-        await self.refresh_24h()
+        self.loop.create_task(self.refresh_24h())
         self.send_log("...", "Refreshing Embeds")
-        await self.refresh()
+        self.loop.create_task(self.refresh())
         self.send_log("...", "Refreshing Roles")
-        await self.refresh_roles()
+        self.loop.create_task(self.refresh_roles())
         self.send_log("...", "Refreshing Role Embeds")
         await self.gen_role_embeds()
         self.send_log("...", "Refreshing Presence")
         await self.refresh_presence()
         self.send_log("...", "!! Startup Process Finished !!")
-        while True and not self.is_closed():
+        while True:
             try:
                 counter += 1
                 ticks += 1
@@ -381,6 +386,8 @@ class Shiro(commands.Bot):
                 return
             except Exception as error:
                 self.send_log("Ontime Err", str(error))
+            except:
+                self.send_log("Ontime Err", "I honestly don't know")
 
     # ======================== #
     #                          #
@@ -390,29 +397,8 @@ class Shiro(commands.Bot):
 
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
-
-    async def on_connect(self):
         await asyncio.ensure_future(self.on_time_loop())
 
-    async def on_message(self, message):
-        print(message.content)
-        await self.process_commands(message)
 
-    # ======================== #
-    #                          #
-    # ####### BOT CMDS ####### #
-    #                          #
-    # ======================== #
-
-    @commands.command()
-    async def ping(self, ctx):
-        await ctx.send(content="Ping!")
-
-    @commands.command()
-    async def uptime(self, ctx):
-        if self.is_mod(ctx.author):
-            timedif = strfdelta(datetime.utcnow() - self.start_time)
-            await ctx.send(content=timedif)
-
-
-bot = Shiro()
+if __name__ == "__main__":
+    bot = Shiro()
