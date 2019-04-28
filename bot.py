@@ -355,13 +355,13 @@ class Shiro(commands.Bot):
                 ticks += 1
                 await asyncio.sleep(0.5)
                 if counter % 30 == 0:
-                    self.loop.run_until_complete(self.refresh())
+                    self.loop.create_task(self.refresh())
                 if counter % 90 == 0:
-                    self.loop.run_until_complete(self.refresh_24h())
-                    self.loop.run_until_complete(self.refresh_presence())
+                    self.loop.create_task(self.refresh_24h())
+                    self.loop.create_task(self.refresh_presence())
                 if ticks % 100 == 0:
                     await self.channels.uptime.send(f":large_blue_circle: I have been up for **{ticks}** ticks.")
-                    self.loop.run_until_complete(self.refresh_roles())
+                    self.loop.create_task(self.refresh_roles())
                 if counter == 7200:
                     hours += 1
                     await self.channels.uptime.send(f":large_blue_circle: **!!** I have been up for **{hours}** hours.")
@@ -382,7 +382,7 @@ class Shiro(commands.Bot):
         self.send_log("Bot Client", "Ready on Discord")
 
     async def on_connect(self):
-        self.loop.create_task(self.on_time_loop())
+        await asyncio.ensure_future(self.on_time_loop())
 
     async def on_disconnect(self):
         self.send_log("Bot Client", "Disconnected")
