@@ -142,6 +142,9 @@ class Shiro(commands.Bot):
         Role = namedtuple("Role", "kitsune member spacer_pings spacer_special "
                                   "news_server news_anime disc_anime disc_manga")
 
+        print(self.role_ids)
+        print(self.senko_guild.roles)
+
         kitsune = get(self.senko_guild.roles, id=self.role_ids["kitsune"])
         member = get(self.senko_guild.roles, id=self.role_ids["member"])
         spacer_pings = get(self.senko_guild.roles, id=self.role_ids["spacer-pings"])
