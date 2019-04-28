@@ -154,10 +154,6 @@ class Shiro(commands.Bot):
         self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
                           disc_manga)
 
-        print(isinstance(self.roles.member, discord.Role))
-        print(isinstance(self.roles.spacer_pings, discord.Role))
-        print(isinstance(self.roles.spacer_special, discord.Role))
-
     # ======================== #
     #                          #
     # ######## ONTIME ######## #
@@ -328,9 +324,9 @@ class Shiro(commands.Bot):
     async def refresh_roles(self):
         for member in self.senko_guild.members:
             if not self.has_base_roles(member) and not member.bot:
-                await member.add_roles(member, self.roles.spacer_special)
-                await member.add_roles(member, self.roles.spacer_pings)
-                await member.add_roles(member, self.roles.member)
+                await member.add_roles(self.roles.spacer_special)
+                await member.add_roles(self.roles.spacer_pings)
+                await member.add_roles(self.roles.member)
 
     async def refresh_presence(self):
         currently_playing = discord.Game(name=f"{'with {} users!'.format(len(self.senko_guild.members))}  ·  !help")
