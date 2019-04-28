@@ -143,7 +143,7 @@ class Shiro(commands.Bot):
                                   "news_server news_anime disc_anime disc_manga")
 
         kitsune = get(self.senko_guild.roles, id=int(self.role_ids["kitsune"]))
-        member = self.senko_guild.get_role(self.role_ids["member"])
+        member = self.senko_guild.get_role(int(self.role_ids["member"]))
         spacer_pings = self.senko_guild.get_role(int(self.role_ids["spacer-pings"]))
         spacer_special = self.senko_guild.get_role(int(self.role_ids["spacer-special"]))
         news_server = get(self.senko_guild.roles, id=int(self.role_ids["news-server"]))
