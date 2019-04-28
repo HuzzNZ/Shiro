@@ -58,7 +58,7 @@ class Shiro(commands.Bot):
 
         # Loading Constants
         self.constants = self.load_file(self.const_file)
-        self.senko_guild = namedtuple("Guild", "members")
+        self.senko_guild = None
         self.channel_ids = dict
         self.channels = namedtuple("Channel", "roles release uptime logs pins")
         self.role_ids = dict
@@ -145,7 +145,7 @@ class Shiro(commands.Bot):
         kitsune = get(self.senko_guild.roles, id=int(self.role_ids["kitsune"]))
         member = get(self.senko_guild.roles, id=int(self.role_ids["member"]))
         spacer_pings = get(self.senko_guild.roles, id=int(self.role_ids["spacer-pings"]))
-        spacer_special = get(self.senko_guild.roles, id=572052449658142721)
+        spacer_special = self.senko_guild.get_role(int(self.role_ids["spacer-special"]))
         news_server = get(self.senko_guild.roles, id=int(self.role_ids["news-server"]))
         news_anime = get(self.senko_guild.roles, id=int(self.role_ids["news-anime"]))
         disc_anime = get(self.senko_guild.roles, id=int(self.role_ids["disc-anime"]))
