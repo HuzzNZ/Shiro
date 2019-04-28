@@ -17,6 +17,7 @@ from anilist_api import find_manga_by_name
 
 from util import build_next_ep_embed
 from util import time_diff
+from util import strfdelta
 
 from collections import namedtuple
 import json
@@ -397,8 +398,15 @@ class Shiro(commands.Bot):
     #                          #
     # ======================== #
 
+    @commands.command()
     async def ping(self, ctx):
         await ctx.send(content="Ping!")
+
+    @commands.command()
+    async def uptime(self, ctx):
+        if self.is_mod(ctx.author):
+            timedif = strfdelta(datetime.utcnow() - self.start_time)
+            await ctx.send(content=timedif)
 
 
 bot = Shiro()
