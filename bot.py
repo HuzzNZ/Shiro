@@ -61,6 +61,9 @@ class Shiro(commands.Bot):
         self.senko_guild = discord.Guild
         self.channel_ids = dict
         self.channels = namedtuple("Channel", "roles release uptime logs pins")
+        self.role_ids = dict
+        self.roles = namedtuple("Role", "kitsune member spacer_pings spacer_special "
+                                        "news_server news_anime disc_anime disc_manga")
 
         # Loading Pin Threshold
         self.pin_threshold = self.constants["pin_threshold"]
@@ -96,30 +99,28 @@ class Shiro(commands.Bot):
         return input_str.replace("<", "").replace("@", "").replace("!", "").replace(">", "")
 
     def has_base_roles(self, member: discord.Member):
-        pass
-        # base_roles = [
-        #     self.roles.member,
-        #     self.roles.spacer_pings,
-        #     self.roles.spacer_special
-        # ]
-        #
-        # has_roles = False
-        # for role in base_roles:
-        #     owned = get(member.roles, id=role.id)
-        #     if owned:
-        #         has_roles = True
-        #     else:
-        #         has_roles = False
-        #         break
-        #
-        # return has_roles
+        base_roles = [
+            self.roles.member,
+            self.roles.spacer_pings,
+            self.roles.spacer_special
+        ]
+
+        has_roles = False
+        for role in base_roles:
+            owned = get(member.roles, id=role.id)
+            if owned:
+                has_roles = True
+            else:
+                has_roles = False
+                break
+
+        return has_roles
 
     def is_mod(self, member: discord.Member):
-        pass
-        # owned = get(member.roles, id=self.roles.kitsune.id)
-        # if owned:
-        #     return True
-        # return False
+        owned = get(member.roles, id=self.roles.kitsune.id)
+        if owned:
+            return True
+        return False
 
     async def define_constants(self):
         self.senko_guild = self.get_guild(int(self.constants['guild']))
@@ -138,21 +139,21 @@ class Shiro(commands.Bot):
 
         # Loading Roles
 
-        # self.role_ids = self.constants["roles"]
-        # Role = namedtuple("Role", "kitsune member spacer_pings spacer_special "
-        #                           "news_server news_anime disc_anime disc_manga")
-        #
-        # kitsune = self.senko_guild.get_role(id=int(self.role_ids["kitsune"]))
-        # member = self.senko_guild.get_role(id=int(self.role_ids["member"]))
-        # spacer_pings = self.senko_guild.get_role(id=int(self.role_ids["spacer-pings"]))
-        # spacer_special = self.senko_guild.get_role(id=int(self.role_ids["spacer-special"]))
-        # news_server = self.senko_guild.get_role(id=int(self.role_ids["news-server"]))
-        # news_anime = self.senko_guild.get_role(id=int(self.role_ids["news-anime"]))
-        # disc_anime = self.senko_guild.get_role(id=int(self.role_ids["disc-anime"]))
-        # disc_manga = self.senko_guild.get_role(id=int(self.role_ids["disc-manga"]))
+        self.role_ids = self.constants["roles"]
+        Role = namedtuple("Role", "kitsune member spacer_pings spacer_special "
+                                  "news_server news_anime disc_anime disc_manga")
 
-        # self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
-        #                   disc_manga)
+        kitsune = self.senko_guild.get_role(id=int(self.role_ids["kitsune"]))
+        member = self.senko_guild.get_role(id=int(self.role_ids["member"]))
+        spacer_pings = self.senko_guild.get_role(id=int(self.role_ids["spacer-pings"]))
+        spacer_special = self.senko_guild.get_role(id=int(self.role_ids["spacer-special"]))
+        news_server = self.senko_guild.get_role(id=int(self.role_ids["news-server"]))
+        news_anime = self.senko_guild.get_role(id=int(self.role_ids["news-anime"]))
+        disc_anime = self.senko_guild.get_role(id=int(self.role_ids["disc-anime"]))
+        disc_manga = self.senko_guild.get_role(id=int(self.role_ids["disc-manga"]))
+
+        self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
+                          disc_manga)
 
     # ======================== #
     #                          #
@@ -400,7 +401,7 @@ class Shiro(commands.Bot):
     # ======================== #
 
     async def ping(self, ctx):
-        await ctx.self.send(content="Ping!")
+        await ctx.send(content="Ping!")
 
 
 bot = Shiro()
