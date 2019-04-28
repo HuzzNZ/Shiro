@@ -58,7 +58,7 @@ class Shiro(commands.Bot):
 
         # Loading Constants
         self.constants = self.load_file(self.const_file)
-        self.senko_guild = discord.Guild
+        self.senko_guild = namedtuple("Guild", "members")
         self.channel_ids = dict
         self.channels = namedtuple("Channel", "roles release uptime logs pins")
         self.role_ids = dict
@@ -323,12 +323,11 @@ class Shiro(commands.Bot):
         await server_embed_msg.add_reaction("🇲")
 
     async def refresh_roles(self):
-        pass
-        # for member in self.senko_guild.members:
-        #     if not self.has_base_roles(member) and not member.bot:
-        #         await member.add_roles(member, self.roles.spacer_special)
-        #         await member.add_roles(member, self.roles.spacer_pings)
-        #         await member.add_roles(member, self.roles.member)
+        for member in self.senko_guild.members:
+            if not self.has_base_roles(member) and not member.bot:
+                await member.add_roles(member, self.roles.spacer_special)
+                await member.add_roles(member, self.roles.spacer_pings)
+                await member.add_roles(member, self.roles.member)
 
     async def refresh_presence(self):
         currently_playing = discord.Game(name=f"{'with {} users!'.format(len(self.senko_guild.members))}  ·  !help")
@@ -351,7 +350,7 @@ class Shiro(commands.Bot):
         self.send_log("...", "Refreshing Presence")
         await self.refresh_presence()
         self.send_log("...", "!! Startup Process Finished !!")
-        while True and not self.is_closed:
+        while True:
             try:
                 counter += 1
                 ticks += 1
@@ -373,9 +372,6 @@ class Shiro(commands.Bot):
                 return
             except Exception as error:
                 self.send_log("Ontime Err", str(error))
-        else:
-            self.send_log("DEBUG", "On Time Loop: Bot is closed.")
-            await asyncio.sleep(1)
 
     # ======================== #
     #                          #
