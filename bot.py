@@ -392,7 +392,7 @@ class Shiro(commands.Bot):
 
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
-        await self.on_time_loop()
+        self.loop.create_task(self.on_time_loop())
 
 
 if __name__ == "__main__":
