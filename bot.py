@@ -353,11 +353,11 @@ class Shiro(commands.Bot):
         await self.define_constants()
         await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
         self.send_log("...", "Refreshing 24h")
-        self.loop.create_task(self.refresh_24h())
+        await self.refresh_24h()
         self.send_log("...", "Refreshing Embeds")
-        self.loop.create_task(self.refresh())
+        await self.refresh()
         self.send_log("...", "Refreshing Roles")
-        self.loop.create_task(self.refresh_roles())
+        await self.refresh_roles()
         self.send_log("...", "Refreshing Role Embeds")
         await self.gen_role_embeds()
         self.send_log("...", "Refreshing Presence")
@@ -396,7 +396,7 @@ class Shiro(commands.Bot):
 
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
-        await asyncio.ensure_future(self.on_time_loop())
+        await self.on_time_loop()
 
 
 if __name__ == "__main__":
