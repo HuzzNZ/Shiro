@@ -88,10 +88,6 @@ class Shiro(commands.Bot):
         # Starting the bot
         self.send_log("Bot Client", "Starting process")
 
-        if not sys.platform == "win32":
-            self.loop.add_signal_handler(signal.SIGINT, lambda: self.loop.stop())
-            self.loop.add_signal_handler(signal.SIGTERM, lambda: self.loop.stop())
-
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
         self.run(self.token)
@@ -369,13 +365,13 @@ class Shiro(commands.Bot):
                 ticks += 1
                 await asyncio.sleep(0.5)
                 if counter % 30 == 0:
-                    self.loop.create_task(self.refresh())
+                    await self.refresh()
                 if counter % 90 == 0:
-                    self.loop.create_task(self.refresh_24h())
-                    self.loop.create_task(self.refresh_presence())
+                    await self.refresh_24h()
+                    await self.refresh_presence()
                 if ticks % 100 == 0:
                     await self.channels.uptime.send(f":large_blue_circle: I have been up for **{ticks}** ticks.")
-                    self.loop.create_task(self.refresh_roles())
+                    await self.refresh_roles()
                 if counter == 7200:
                     hours += 1
                     await self.channels.uptime.send(f":large_blue_circle: **!!** I have been up for **{hours}** hours.")
