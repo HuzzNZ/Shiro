@@ -708,12 +708,17 @@ class Shiro(commands.Bot):
             )
             await embed_msg.edit(embed=embed)
         else:
-            self.send_log("Pinboard +", "({}) {}#{}: {} [{}]".format(
-                pin_count, message.author.name, message.author.discriminator, message.content, message.created_at))
+            if not message.content:
+                content = "*No Content*"
+            else:
+                content = message.content
 
-            embed_title = "**Pinned message in *#{}:***".format(message.channel.name)
-            embed_desc = ":pushpin: **x {}**\n─────────────────\n<@{}>:".format(pin_count, message.author.id,
-                                                                                message.content)
+            self.send_log("Pinboard +", "({}) {}#{}: {} [{}]".format(
+                pin_count, message.author.name, message.author.discriminator, content, message.created_at))
+
+            embed_title = "**Pinned message:**".format(message.channel.name)
+            embed_desc = ":pushpin: **x {}**  in <#{}>:\n─────────────────\n<@{}>:".format(message.channel.id,
+                                                                                           pin_count, message.author.id)
             has_embed = False
             embed_url = None
             if message.embeds:
@@ -732,7 +737,7 @@ class Shiro(commands.Bot):
                 timestamp=message.created_at,
                 color=0xbd3d45
             )
-            embed.add_field(name=message.content, value="** **")
+            embed.add_field(name=content, value="** **")
             embed.set_thumbnail(url=message.author.avatar_url)
             if has_embed:
                 embed.set_image(url=embed_url)
@@ -752,15 +757,18 @@ class Shiro(commands.Bot):
                             self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
                                 message.content, pin_count))
 
-                            embed_desc = ":pushpin: **x {}**\n─────────────────\n<@{}>:".format(
-                                pin_count, message.author.id, message.content)
+                            embed_desc = ":pushpin: **x {}**  in <#{}>:\n─────────────────\n<@{}>:".format(
+                                message.channel.id,
+                                pin_count,
+                                message.author.id
+                            )
                             embed = discord.Embed(
                                 title=embed_title,
                                 description=embed_desc,
                                 timestamp=message.created_at,
                                 color=0xbd3d45
                             )
-                            embed.add_field(name=message.content, value="** **")
+                            embed.add_field(name=content, value="** **")
                             embed.set_thumbnail(url=message.author.avatar_url)
                             if has_embed:
                                 embed.set_image(url=embed_url)
