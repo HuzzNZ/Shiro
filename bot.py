@@ -74,7 +74,7 @@ class Shiro(commands.Bot):
         self.constants = self.load_file(self.const_file)
         self.senko_guild = None
         self.channel_ids = dict
-        self.channels = namedtuple("Channel", "roles release uptime logs pins")
+        self.channels = namedtuple("Channel", "roles release uptime logs pins docs staff_bot")
         self.role_ids = dict
         self.roles = namedtuple("Role", "kitsune member spacer_pings spacer_special "
                                         "news_server news_anime disc_anime disc_manga")
@@ -137,15 +137,17 @@ class Shiro(commands.Bot):
 
         # Loading Channels
         self.channel_ids = self.constants["channels"]
-        Channel = namedtuple("Channel", "roles release uptime logs pins")
+        Channel = namedtuple("Channel", "roles release uptime logs pins docs, staff_bot")
 
         roles = self.get_channel(id=int(self.channel_ids["roles"]))
         release = self.get_channel(id=int(self.channel_ids["release"]))
         uptime = self.get_channel(id=int(self.channel_ids["uptime"]))
         logs = self.get_channel(id=int(self.channel_ids["logs"]))
         pins = self.get_channel(id=int(self.channel_ids["pins"]))
+        docs = self.get_channel(id=int(self.channel_ids["docs"]))
+        staff_bot = self.get_channel(id=int(self.channel_ids["staff-bot"]))
 
-        self.channels = Channel(roles, release, uptime, logs, pins)
+        self.channels = Channel(roles, release, uptime, logs, pins, docs, staff_bot)
 
         # Loading Roles
 
@@ -396,8 +398,16 @@ class Shiro(commands.Bot):
         self.send_log("Bot Client", "Ready on Discord")
         self.loop.create_task(self.on_time_loop())
 
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         content = message.content
+        if "discord.gg" in content:
+            if not get(message.author.roles, id=self.roles.kitsune.id):
+                await message.delete()
+                await self.channels.staff_bot.send(
+                    content=f"{message.author.mention} just tried to post this invite "
+                    f"link in {message.channel}: {message.content}"
+                )
+            return
         if "{" in content and "}" in content:
             try:
                 to_find_list = []
@@ -422,9 +432,8 @@ class Shiro(commands.Bot):
                         data = await find_anime_by_name(to_find)
                         return_data = await build_small_embed(data)
                         if not return_data:
-                            self.send_log("Anime Qry {", "{}#{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
-                                          "not found!".format(
-                                              message.author.name, message.author.discriminator, to_find))
+                            self.send_log("Anime {Qry", "{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
+                                          "not found!".format(message.author, to_find))
                             embed = discord.Embed(
                                 title=":no_entry:  Title __{}__ **not found**!".format(content),
                                 timestamp=datetime.utcnow(),
@@ -432,10 +441,8 @@ class Shiro(commands.Bot):
                             )
                         else:
                             embed = return_data[0]
-                            self.send_log("Anime Qry {", "{}#{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
-                                          "returned {}".format(
-                                              message.author.name, message.author.discriminator, to_find,
-                                              return_data[1]))
+                            self.send_log("Anime {Qry", "{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
+                                          "returned {}".format(message.author, to_find, return_data[1]))
                         await message.channel.send(embed=embed)
 
         elif "[" in content and "]" in content:
@@ -460,8 +467,8 @@ class Shiro(commands.Bot):
                         return
                     if "[" not in to_find or "]" not in to_find:
                         data = await find_manga_by_name(to_find)
-                        print("[Anime Qry ] {}#{} - Queried \"{}\" to Anilist.co (USING BRACKETS), ".format(
-                            message.author.name, message.author.discriminator, to_find), end="")
+                        self.send_log("Manga [Qry", "{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
+                                                    "not found!".format(message.author, to_find))
                         return_data = await build_small_manga_embed(data)
                         if not return_data:
                             print("not found!")
@@ -472,7 +479,8 @@ class Shiro(commands.Bot):
                             )
                         else:
                             embed = return_data[0]
-                            print("returned \"{}\".".format(return_data[1]))
+                            self.send_log("Manga [Qry", "{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
+                                          "returned {}".format(message.author, to_find, return_data[1]))
                         await message.channel.send(embed=embed)
 
         elif content.split(" ")[0] == "!8ball":
@@ -489,12 +497,149 @@ class Shiro(commands.Bot):
                 await self.process_commands(message)
             except discord.ext.commands.errors.CommandNotFound:
                 embed = discord.Embed(
-                    title=":no_entry:  Command **{}** not found!".format(message.split(" ")[0].replace("!", "")),
+                    title=":no_entry:  Command **{}** not found!".format(message.content.split(" ")[0].replace(
+                        "!", "")),
                     color=0xa22c34
                 )
                 embed.set_footer(text='!help to see a list of all available commands.')
                 cmd_not_found_msg = await message.channel.send(embed=embed)
                 await cmd_not_found_msg.delete(delay=5)
+
+    async def on_member_join(self, member):
+        # Adding Member Role
+        self.send_log("User Join", f"{member}({member.id}) joined.")
+        await member.add_roles(self.roles.member, self.roles.spacer_pings, self.roles.spacer_special)
+
+        # server-logs message
+        embed = discord.Embed(
+            title=":door:  **{}#{}** joined the server.".format(member.name, member.discriminator),
+            description="** **",
+            color=0x99cc99,
+            timestamp=member.joined_at
+        )
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Account created at:", value=str(member.created_at) + " ({} ago)".format(
+            await time_diff(datetime.utcnow(), member.created_at)), inline=False)
+        embed.add_field(name="User ID:", value=f"{member.mention} {member.id}", inline=False)
+
+        await self.channels.logs.send(embed=embed)
+
+    async def on_member_remove(self, member):
+        # server-logs message
+        self.send_log("User Leave", f"{member}({member.id}) left.")
+
+        embed = discord.Embed(
+            title=":no_entry_sign:  **{}#{}**  left the server after **{}**.".format(
+                member.name,
+                member.discriminator,
+                strfdelta(datetime.utcnow() - member.joined_at)
+            ),
+            description="** **",
+            color=0xcc9999,
+            timestamp=datetime.utcnow()
+        )
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="User ID:", value=f"{member.mention} {member.id}", inline=False)
+
+        await self.channels.logs.send(embed=embed)
+
+    async def on_message_edit(self, before, after):
+        member = before.author
+        if after.content and before.content and not after.content == before.content:
+            self.send_log(
+                "Msg Edit",
+                f"{member}({member.id}) edited message in #{before.channel.name}:\n"
+                f"                 {before.content}\n"
+                f"              -> {after.content}"
+            )
+            embed = discord.Embed(
+                title=":information_source:  **{}#{}**  Edited message:".format(member.name, member.discriminator),
+                description="** **",
+                color=0x999999,
+                timestamp=after.timestamp
+            )
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.add_field(name="Before:", value=before.content, inline=False)
+            embed.add_field(name="After:", value=after.content, inline=False)
+            embed.add_field(name="In:", value=f'<#{before.channel.id}>', inline=False)
+            embed.add_field(name="User ID:", value=f"{after.author.mention} {after.author.id}", inline=False)
+
+            await self.channels.logs.send(embed=embed)
+
+    async def on_message_delete(self, message):
+        member = message.author
+        self.send_log(
+            "Msg Delete",
+            f"[Msg Del   ] {member}({member.id}) deleted message in #{message.channel.name}:\n"
+            f"               - {message.content}")
+        embed = discord.Embed(
+            title=":information_source:  **{}#{}**  Deleted message:".format(member.name, member.discriminator),
+            description="** **",
+            color=0x999999,
+            timestamp=message.timestamp
+        )
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Content:", value=message.content, inline=False)
+        embed.add_field(name="In:", value=f'<#{message.channel.id}>', inline=False)
+        embed.add_field(name="User ID:", value=f"{member.mention} {message.author.id}", inline=False)
+
+        await self.channels.logs.send(embed=embed)
+
+    async def on_reaction_add(self, reaction, user):
+        if not user.bot:
+            if reaction.emoji == "📌":
+                self.send_log("Pinboard", "Pin reaction found")
+                has_pin = False
+                message = reaction.message
+                for reaction in message.reactions:
+                    if reaction.emoji == "📌":
+                        if reaction.count > 1:
+                            has_pin = True
+                            break
+                if not has_pin:
+                    await self.pin_loop(message)
+
+            elif reaction.emoji == "📰":
+                if reaction.message.channel == self.channels.roles:
+                    await user.add_roles(self.roles.news_server)
+                    self.send_log("Role Rxn +", "Added Server News to {} ({})".format(user, user.id))
+
+            elif reaction.emoji == "🇯🇵":
+                if reaction.message.channel == self.channels.roles:
+                    await user.add_roles(self.roles.news_anime)
+                    self.send_log("Role Rxn +", "Added Anime News to {} ({})".format(user, user.id))
+
+            elif reaction.emoji == "🇦":
+                if reaction.message.channel == self.channels.roles:
+                    await user.add_roles(self.roles.disc_anime)
+                    self.send_log("Role Rxn +", "Added Anime Disc to {} ({})".format(user, user.id))
+
+            elif reaction.emoji == "🇲":
+                if reaction.message.channel.id == self.channels.roles:
+                    await user.add_roles(self.roles.disc_manga)
+                    self.send_log("Role Rxn +", "Added Manga Disc to {} ({})".format(user, user.id))
+
+    async def on_reaction_remove(self, reaction, user):
+        if not user.bot:
+            if reaction.emoji == "📰":
+                if reaction.message.channel == self.channels.roles:
+                    await user.remove_roles(self.roles.news_server)
+                    self.send_log("Role Rxn -", "Removed Server News from {} ({})".format(user, user.id))
+
+            elif reaction.emoji == "🇯🇵":
+                if reaction.message.channel == self.channels.roles:
+                    await user.remove_roles(self.roles.news_anime)
+                    self.send_log("Role Rxn -", "Removed Anime News from {} ({})".format(user, user.id))
+
+            elif reaction.emoji == "🇦":
+                if reaction.message.channel == self.channels.roles:
+                    await user.remove_roles(self.roles.disc_anime)
+                    self.send_log("Role Rxn -", "Removed Anime Disc from {} ({})".format(user, user.id))
+
+            elif reaction.emoji == "🇲":
+                if reaction.message.channel.id == self.channels.roles:
+                    await user.remove_roles(self.roles.disc_manga)
+                    self.send_log("Role Rxn -", "Removed Manga Disc from {} ({})".format(user, user.id))
 
     # ======================== #
     #                          #
@@ -653,6 +798,93 @@ class Shiro(commands.Bot):
 
         self.send_log("8 Ball", "{} Asked the 8 ball: {}".format(msg.author, question))
         await msg.channel.send(embed=embed)
+
+    async def add_waifu_role(self, waifu_name, ctx):
+        none_perms = discord.Permissions(0)
+        new_role = await self.senko_guild.create_role(
+            name=waifu_name,
+            permissions=none_perms,
+            color=discord.Colour(0x888888)
+        )
+        await new_role.edit(position=2)
+        self.send_log("Role +", "Added role \"{}\" by {}".format(waifu_name, ctx.author))
+        await ctx.author.add_roles(new_role)
+
+    async def delete_waifu_role(self, waifu_role: discord.Role, ctx):
+        await waifu_role.delete()
+        self.send_log("Role -", "Deleted role \"{}\" by {}".format(waifu_role.name, ctx.message.author))
+
+    async def userinfo_embed(self, ctx: discord.ext.commands.Context, user):
+        if isinstance(user, discord.Member):
+            if user.nick:
+                title = f":information_source:  **{user.nick}** AKA **{user.name}**:"
+            else:
+                title = f":information_source:  **{user.name}**:"
+
+            acc_diff = await time_diff(datetime.utcnow(), user.created_at)
+            account_creation = f"{user.created_at} ({acc_diff} ago)"
+            join_diff = await time_diff(datetime.utcnow(), user.joined_at)
+            join_date = f"{user.joined_at} ({join_diff} ago)"
+            roles_str = ""
+            user_roles = user.roles
+            user_roles.reverse()
+            for role in user_roles:
+                if role.is_everyone:
+                    continue
+                elif role == get(ctx.message.server.roles, id=self.roles.spacer_pings) or role == get(
+                        ctx.message.server.roles, id=self.roles.spacer_special):
+                    continue
+                else:
+                    roles_str += role.mention
+                    roles_str += ","
+                    roles_str += " "
+            roles_str = f"**{roles_str[:-2]}**"
+
+            embed = discord.Embed(
+                title=title,
+                color=0x3b88c3,
+                description="─────────────────"
+            )
+            embed.add_field(name="Full Discord Tag", value=f"{user.mention}  -  {user}", inline=False)
+            embed.add_field(name="ID", value=user.id, inline=False)
+            embed.add_field(name="Account Created At", value=account_creation, inline=False)
+            embed.add_field(name="User Joined At", value=join_date, inline=False)
+            embed.add_field(name="Roles", value=roles_str, inline=False)
+            embed.set_thumbnail(url=user.avatar_url)
+            embed.set_footer(icon_url=bot.user.avatar_url,
+                             text="User info of {} - requested by {}".format(user, ctx.message.author))
+
+            if ctx.message.channel.id == "557469450668998657" or ctx.message.channel.id == "557033330470813697":
+                await ctx.send(embed=embed)
+            else:
+                docs_sent = discord.Embed(
+                    title=":white_check_mark:  User Information **sent**!",
+                    timestamp=ctx.message.timestamp,
+                    color=0x89af5b
+                )
+                await ctx.send(embed=docs_sent)
+                await self.channels.docs.send(embed=embed, content=ctx.message.author.mention)
+        else:
+            embed = discord.Embed(
+                title=":no_entry:  User **not found**!",
+                timestamp=ctx.message.timestamp,
+                color=0xa22c34
+            )
+            await ctx.send(embed=embed)
+
+    async def send_docs(self, ctx: discord.ext.commands.Context, embed):
+        if ctx.channel == self.channels.docs or ctx.channel == self.channels.staff_bot:
+            await ctx.send(embed=embed)
+
+        else:
+            docs_sent = discord.Embed(
+                title=":white_check_mark:  Documentations **sent**!",
+                timestamp=ctx.message.timestamp,
+                color=0x89af5b
+            )
+            msg = await ctx.send(embed=docs_sent)
+            await self.channels.docs.send(embed=embed, content=ctx.author.mention)
+            await msg.delete(delay=5)
 
 
 if __name__ == "__main__":
