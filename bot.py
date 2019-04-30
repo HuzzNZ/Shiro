@@ -401,14 +401,14 @@ class Shiro(commands.Bot):
 
     async def on_connect(self):
         self.ontime_loop = asyncio.ensure_future(self.on_time_loop())
-        print("00")
+        self.send_log("----------", "Connect")
 
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
 
     async def on_disconnect(self):
         self.ontime_loop.cancel()
-        print("01")
+        self.send_log("----------", "Disconnect")
 
     async def on_message(self, message: discord.Message):
         content = message.content
