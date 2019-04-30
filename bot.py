@@ -717,18 +717,19 @@ class Shiro(commands.Bot):
                 pin_count, message.author.name, message.author.discriminator, content, message.created_at))
 
             embed_title = "**Pinned message:**".format(message.channel.name)
-            embed_desc = ":pushpin: **x {}**  in <#{}>:\n─────────────────\n<@{}>:".format(message.channel.id,
-                                                                                           pin_count, message.author.id)
+            embed_desc = ":pushpin: **x {}**  in <#{}>:\n─────────────────\n<@{}>:".format(pin_count,
+                                                                                           message.channel.id,
+                                                                                           message.author.id)
             has_embed = False
             embed_url = None
             if message.embeds:
                 has_embed = True
                 self.send_log("Pinboard", "Pinned Message {} has embed!".format(message.id))
                 for i in message.embeds:
-                    embed_url = i.image.url
-                    if isinstance(embed_url, discord.Embed.Empty):
+                    if not i.image or i.image is discord.Embed.Empty:
                         has_embed = False
                     else:
+                        embed_url = i.image.url
                         has_embed = True
                         break
             embed = discord.Embed(
@@ -747,7 +748,7 @@ class Shiro(commands.Bot):
             for i in range(0, 1800):
                 await asyncio.sleep(1)
                 msg_channel = message.channel
-                message = msg_channel.fetch_message(id=message.id)
+                message = await msg_channel.fetch_message(id=message.id)
                 message_reactions = message.reactions
                 for reaction in message_reactions:
                     if reaction.emoji == "📌":
