@@ -88,11 +88,18 @@ class Shiro(commands.Bot):
 
         # Starting the bot
         self.send_log("Bot Client", "Starting process")
+        self.ontime_loop = asyncio.ensure_future(self.ontime_loop)
 
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
         self.load_extension("cogs.mod_only")
-        self.run(self.token)
+        while True:
+            try:
+                self.run(self.token)
+            except ConnectionResetError:
+                self.send_log("Bot Client", "ConnectionResetError. Attempting reconnect.")
+            except Exception as error:
+                self.send_log("CLIENTERRO", str(error))
 
     @staticmethod
     def send_log(title: str, message: str):
@@ -349,7 +356,7 @@ class Shiro(commands.Bot):
         hours = 0
         counter = 0
         ticks = 0
-        await self.wait_until_ready()
+        await asyncio.sleep(3)
         await self.define_constants()
         await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
         self.send_log("...", "Refreshing 24h")
@@ -369,10 +376,10 @@ class Shiro(commands.Bot):
                 ticks += 1
                 await asyncio.sleep(0.5)
                 if counter % 30 == 0:
+                    await self.refresh_presence()
                     await self.refresh()
                 if counter % 90 == 0:
                     await self.refresh_24h()
-                    await self.refresh_presence()
                 if ticks % 100 == 0:
                     await self.channels.uptime.send(f":large_blue_circle: I have been up for **{ticks}** ticks.")
                     await self.refresh_roles()
@@ -385,8 +392,6 @@ class Shiro(commands.Bot):
                 return
             except Exception as error:
                 self.send_log("Ontime Err", str(error))
-            except:
-                self.send_log("Ontime Err", "I honestly don't know")
 
     # ======================== #
     #                          #
@@ -396,7 +401,9 @@ class Shiro(commands.Bot):
 
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
-        self.loop.create_task(self.on_time_loop())
+
+    async def on_disconnect(self):
+        print("01")
 
     async def on_message(self, message: discord.Message):
         content = message.content
@@ -660,7 +667,7 @@ class Shiro(commands.Bot):
         )
         embed_msg = await msg_channel.send(embed=embed)
         if not message.content:
-            content = "*No Content*"
+            content = "*`<No content>`*"
         else:
             content = message.content
 
@@ -715,11 +722,6 @@ class Shiro(commands.Bot):
         else:
             self.send_log("Pinboard +", "({}) {}#{}: {} [{}]".format(
                 pin_count, message.author.name, message.author.discriminator, content, message.created_at))
-
-            embed_title = "**Pinned message:**".format(message.channel.name)
-            embed_desc = ":pushpin: **x {} ** in <#{}>:\n─────────────────\n<@{}>:".format(pin_count,
-                                                                                           message.channel.id,
-                                                                                           message.author.id)
             has_embed = False
             embed_url = None
             if message.embeds:
@@ -737,48 +739,54 @@ class Shiro(commands.Bot):
                 for i in message.attachments:
                     embed_url = i.url
                     break
+            embed_title = "**Pinned message:**".format(message.channel.name)
+            embed_desc = ":pushpin: **in** <#{}>:\n─────────────────\n<@{}>:".format(
+                message.channel.id, message.author.id)
             embed = discord.Embed(
                 title=embed_title,
                 description=embed_desc,
                 timestamp=message.created_at,
                 color=0xbd3d45
             )
-            embed.add_field(name=content, value="** **")
             embed.set_thumbnail(url=message.author.avatar_url)
             if has_embed:
                 embed.set_image(url=embed_url)
+                content = content.replace(embed_url, "*`<Embedded URL>`*")
+            embed.add_field(name=content, value="** **")
 
-            pin_msg = await self.channels.pins.send(embed=embed)
-
-            for i in range(0, 1800):
-                await asyncio.sleep(1)
-                msg_channel = message.channel
-                message = await msg_channel.fetch_message(id=message.id)
-                message_reactions = message.reactions
-                for reaction in message_reactions:
-                    if reaction.emoji == "📌":
-                        pc_now = pin_count
-                        pin_count = reaction.count
-                        if pc_now != pin_count:
-                            self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
-                                content, pin_count))
-
-                            embed_desc = ":pushpin: **x {} ** in <#{}>:\n─────────────────\n<@{}>:".format(
-                                pin_count,
-                                message.channel.id,
-                                message.author.id
-                            )
-                            embed = discord.Embed(
-                                title=embed_title,
-                                description=embed_desc,
-                                timestamp=message.created_at,
-                                color=0xbd3d45
-                            )
-                            embed.add_field(name=content, value="** **")
-                            embed.set_thumbnail(url=message.author.avatar_url)
-                            if has_embed:
-                                embed.set_image(url=embed_url)
-                            await pin_msg.edit(embed=embed)
+            pin_msg = await self.channels.pins.send(content=f"**Jump to:** <{message.jump_url}>", embed=embed)
+            if pin_msg:
+                pass
+            #
+            # for i in range(0, 1800):
+            #     await asyncio.sleep(1)
+            #     msg_channel = message.channel
+            #     message = await msg_channel.fetch_message(id=message.id)
+            #     message_reactions = message.reactions
+            #     for reaction in message_reactions:
+            #         if reaction.emoji == "📌":
+            #             pc_now = pin_count
+            #             pin_count = reaction.count
+            #             if pc_now != pin_count:
+            #                 self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
+            #                     content, pin_count))
+            #
+            #                 embed_desc = ":pushpin: **x {} ** in <#{}>:\n─────────────────\n<@{}>:".format(
+            #                     pin_count,
+            #                     message.channel.id,
+            #                     message.author.id
+            #                 )
+            #                 embed = discord.Embed(
+            #                     title=embed_title,
+            #                     description=embed_desc,
+            #                     timestamp=message.created_at,
+            #                     color=0xbd3d45
+            #                 )
+            #                 embed.add_field(name=content, value="** **")
+            #                 embed.set_thumbnail(url=message.author.avatar_url)
+            #                 if has_embed:
+            #                     embed.set_image(url=embed_url)
+            #                 await pin_msg.edit(embed=embed)
 
     async def magic8(self, msg, question):
         replies = ["Definitely yes.",
