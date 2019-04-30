@@ -13,12 +13,6 @@ class CmdCog(commands.Cog):
     async def ping(self, ctx):
         await ctx.send(content="Ping!")
 
-    @commands.command()
-    async def uptime(self, ctx):
-        if self.bot.is_mod(ctx.author):
-            timedif = strfdelta(datetime.utcnow() - self.bot.start_time)
-            await ctx.send(content=timedif)
-
 
 def setup(bot):
     bot.add_cog(CmdCog(bot))

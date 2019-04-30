@@ -11,6 +11,8 @@ from anilist_api import find_manga_by_id
 from anilist_api import find_anime_by_name
 from anilist_api import find_manga_by_name
 from util import build_next_ep_embed
+from util import build_small_embed
+from util import build_small_manga_embed
 from util import time_diff
 from util import strfdelta
 from docs import Docs
@@ -21,9 +23,8 @@ from collections import namedtuple
 import json
 import os
 from datetime import datetime
-import signal
 import sys
-
+import random
 
 # asyncio
 import asyncio
@@ -90,6 +91,7 @@ class Shiro(commands.Bot):
 
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
+        self.load_extension("cogs.mods")
         self.run(self.token)
 
     @staticmethod
@@ -393,6 +395,264 @@ class Shiro(commands.Bot):
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
         self.loop.create_task(self.on_time_loop())
+
+    async def on_message(self, message):
+        content = message.content
+        if "{" in content and "}" in content:
+            try:
+                to_find_list = []
+                for i in range(len(content)):
+                    if content[i] == "{":
+                        back_brace = content.find("}", i)
+                        if not back_brace == -1:
+                            to_find_list.append([i, back_brace])
+                            if len(to_find_list) >= 3:
+                                break
+            except IndexError:
+                return
+            if to_find_list:
+                for i in to_find_list:
+                    start = i[0] + 1
+                    end = i[1]
+                    if not start == end:
+                        to_find = content[start:end]
+                    else:
+                        return
+                    if "{" not in to_find or "}" not in to_find:
+                        data = await find_anime_by_name(to_find)
+                        return_data = await build_small_embed(data)
+                        if not return_data:
+                            self.send_log("Anime Qry {", "{}#{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
+                                          "not found!".format(
+                                              message.author.name, message.author.discriminator, to_find))
+                            embed = discord.Embed(
+                                title=":no_entry:  Title __{}__ **not found**!".format(content),
+                                timestamp=datetime.utcnow(),
+                                color=0xa22c34
+                            )
+                        else:
+                            embed = return_data[0]
+                            self.send_log("Anime Qry {", "{}#{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
+                                          "returned {}".format(
+                                              message.author.name, message.author.discriminator, to_find,
+                                              return_data[1]))
+                        await message.channel.send(embed=embed)
+
+        elif "[" in content and "]" in content:
+            try:
+                to_find_list = []
+                for i in range(len(content)):
+                    if content[i] == "[":
+                        back_brace = content.find("]", i)
+                        if not back_brace == -1:
+                            to_find_list.append([i, back_brace])
+                            if len(to_find_list) >= 3:
+                                break
+            except IndexError:
+                return
+            if to_find_list:
+                for i in to_find_list:
+                    start = i[0] + 1
+                    end = i[1]
+                    if not start == end:
+                        to_find = content[start:end]
+                    else:
+                        return
+                    if "[" not in to_find or "]" not in to_find:
+                        data = await find_manga_by_name(to_find)
+                        print("[Anime Qry ] {}#{} - Queried \"{}\" to Anilist.co (USING BRACKETS), ".format(
+                            message.author.name, message.author.discriminator, to_find), end="")
+                        return_data = await build_small_manga_embed(data)
+                        if not return_data:
+                            print("not found!")
+                            embed = discord.Embed(
+                                title=":no_entry:  Title __{}__ **not found**!".format(content),
+                                timestamp=datetime.utcnow(),
+                                color=0xa22c34
+                            )
+                        else:
+                            embed = return_data[0]
+                            print("returned \"{}\".".format(return_data[1]))
+                        await message.channel.send(embed=embed)
+
+        elif content.split(" ")[0] == "!8ball":
+            question = ""
+            for i in content.split(" "):
+                if not i == "!8ball":
+                    question += i
+                    question += " "
+            question = question.strip()
+            await self.magic8(message, question)
+
+        else:
+            try:
+                await bot.process_commands(message)
+            except discord.ext.commands.errors.CommandNotFound:
+                embed = discord.Embed(
+                    title=":no_entry:  Command **{}** not found!".format(message.split(" ")[0].replace("!", "")),
+                    color=0xa22c34
+                )
+                embed.set_footer(text='!help to see a list of all available commands.')
+                cmd_not_found_msg = await message.channel.send(embed=embed)
+                await cmd_not_found_msg.delete(delay=5)
+
+    # ======================== #
+    #                          #
+    # ######### UTIL ######### #
+    #                          #
+    # ======================== #
+
+    async def pin_loop(self, message):
+        msg_channel = message.channel
+        pin_count = 0
+        pinned = False
+        self.send_log("Pinboard", "Pin tracking on message \"{}\"".format(message.content))
+        embed = discord.Embed(
+            title=":pushpin:  Pinboard vote **Initiated**.",
+            description="**{}**/**{}**".format(1, self.pin_threshold),
+            timestamp=message.timestamp,
+            color=0xbd3d45
+        )
+        embed_msg = await msg_channel.send(embed=embed)
+        for i in range(0, 600):
+            await asyncio.sleep(0.05)
+            message = await msg_channel.fetch_message(id=message.id)
+            message_reactions = message.reactions
+            for reaction in message_reactions:
+                if reaction.emoji == "📌":
+                    pc_now = pin_count
+                    pin_count = reaction.count
+                    if pc_now != pin_count:
+                        self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
+                            message.content, pin_count))
+                        if pin_count >= self.pin_threshold:
+                            embed = discord.Embed(
+                                title=":pushpin:  Pinboard vote **succeeded**!",
+                                description="**{}**/**{}**".format(pin_count, self.pin_threshold),
+                                timestamp=message.timestamp,
+                                color=0x89af5b
+                            )
+                            await embed_msg.edit(embed=embed)
+                            pinned = True
+                            break
+                        else:
+                            embed = discord.Embed(
+                                title=":pushpin:  Pinboard vote **Pending**:",
+                                description="**{}**/**{}**".format(pin_count, self.pin_threshold),
+                                timestamp=message.timestamp,
+                                color=0xffa749
+                            )
+                            await embed_msg.edit(embed=embed)
+                else:
+                    try:
+                        await embed_msg.delete()
+                        break
+                    except Exception as error:
+                        self.send_log("Pinboard e", str(error))
+                        continue
+            if pinned:
+                break
+            else:
+                pinned = False
+        if not pinned:
+            embed = discord.Embed(
+                title=":pushpin:  Pinboard vote **Failed**!",
+                description="**{}**/**{}**".format(pin_count, self.pin_threshold),
+                timestamp=message.timestamp,
+                color=0xbd3d45
+            )
+            await embed_msg.edit(embed=embed)
+        else:
+            self.send_log("Pinboard +", "({}) {}#{}: {} [{}]".format(
+                pin_count, message.author.name, message.author.discriminator, message.content, message.timestamp))
+
+            embed_title = "**Pinned message in *#{}:***".format(message.channel.name)
+            embed_desc = ":pushpin: **x {}**\n─────────────────\n<@{}>:".format(pin_count, message.author.id,
+                                                                                message.content)
+            has_embed = False
+            embed_url = None
+            if message.embeds:
+                has_embed = True
+                self.send_log("Pinboard", "Pinned Message {} has embed!".format(message.id))
+                for i in message.embeds:
+                    embed_url = i.image.url
+                    if isinstance(embed_url, discord.Embed.Empty):
+                        has_embed = False
+                    else:
+                        has_embed = True
+                        break
+            embed = discord.Embed(
+                title=embed_title,
+                description=embed_desc,
+                timestamp=message.timestamp,
+                color=0xbd3d45
+            )
+            embed.add_field(name=message.content, value="** **")
+            embed.set_thumbnail(url=message.author.avatar_url)
+            if has_embed:
+                embed.set_image(url=embed_url)
+
+            pin_msg = await self.channels.pins.send(embed=embed)
+
+            for i in range(0, 1800):
+                await asyncio.sleep(1)
+                msg_channel = message.channel
+                message = msg_channel.fetch_message(id=message.id)
+                message_reactions = message.reactions
+                for reaction in message_reactions:
+                    if reaction.emoji == "📌":
+                        pc_now = pin_count
+                        pin_count = reaction.count
+                        if pc_now != pin_count:
+                            self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
+                                message.content, pin_count))
+
+                            embed_desc = ":pushpin: **x {}**\n─────────────────\n<@{}>:".format(
+                                pin_count, message.author.id, message.content)
+                            embed = discord.Embed(
+                                title=embed_title,
+                                description=embed_desc,
+                                timestamp=message.timestamp,
+                                color=0xbd3d45
+                            )
+                            embed.add_field(name=message.content, value="** **")
+                            embed.set_thumbnail(url=message.author.avatar_url)
+                            if has_embed:
+                                embed.set_image(url=embed_url)
+                            await pin_msg.edit(embed=embed)
+
+    async def magic8(self, msg, question):
+        replies = ["Definitely yes.",
+                   "Perhaps.",
+                   "Maybe yes?",
+                   "Probably not.",
+                   "That's a no.",
+                   "Fuck no!",
+                   "Ask again?",
+                   "Not now.",
+                   "In a week's time.",
+                   "No doubt",
+                   "I cannot tell you now.",
+                   "Reply hazy... Try again later.",
+                   "It's better you don't ask.",
+                   "You even need to ask that?",
+                   "If that's what you want.",
+                   "I have no idea.",
+                   "YES! YES! YES!",
+                   "Please stop asking me."]
+        random_choice = random.choice(replies)
+        title = ":8ball:  **{}#{} summoned the 8-ball:**".format(msg.author.name, msg.author.discriminator)
+        question = question.replace("?", "")
+        description = "─────────────────\n⁣\nQ: {}?\nA: **{}**⁣".format(question, random_choice)
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=0x6800d1
+        )
+
+        self.send_log("8 Ball", "{} Asked the 8 ball: {}".format(msg.author, question))
+        await msg.channel.send(embed=embed)
 
 
 if __name__ == "__main__":
