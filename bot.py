@@ -486,7 +486,7 @@ class Shiro(commands.Bot):
 
         else:
             try:
-                await bot.process_commands(message)
+                await self.process_commands(message)
             except discord.ext.commands.errors.CommandNotFound:
                 embed = discord.Embed(
                     title=":no_entry:  Command **{}** not found!".format(message.split(" ")[0].replace("!", "")),
