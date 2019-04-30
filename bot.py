@@ -88,7 +88,7 @@ class Shiro(commands.Bot):
 
         # Starting the bot
         self.send_log("Bot Client", "Starting process")
-        self.ontime_loop = asyncio.ensure_future(self.on_time_loop())
+        self.ontime_loop = None
 
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
@@ -356,7 +356,7 @@ class Shiro(commands.Bot):
         hours = 0
         counter = 0
         ticks = 0
-        await asyncio.sleep(3)
+        await self.wait_until_ready()
         await self.define_constants()
         await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
         self.send_log("...", "Refreshing 24h")
@@ -399,10 +399,15 @@ class Shiro(commands.Bot):
     #                          #
     # ======================== #
 
+    async def on_connect(self):
+        self.ontime_loop = asyncio.ensure_future(self.on_time_loop())
+        print("00")
+
     async def on_ready(self):
         self.send_log("Bot Client", "Ready on Discord")
 
     async def on_disconnect(self):
+        self.ontime_loop.cancel()
         print("01")
 
     async def on_message(self, message: discord.Message):
