@@ -91,7 +91,7 @@ class Shiro(commands.Bot):
 
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
-        self.load_extension("cogs.mods_only")
+        self.load_extension("cogs.mod_only")
         self.run(self.token)
 
     @staticmethod
