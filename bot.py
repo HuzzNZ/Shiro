@@ -556,7 +556,7 @@ class Shiro(commands.Bot):
                 title=":information_source:  **{}#{}**  Edited message:".format(member.name, member.discriminator),
                 description="** **",
                 color=0x999999,
-                timestamp=after.timestamp
+                timestamp=after.created_at
             )
             embed.set_thumbnail(url=member.avatar_url)
             embed.add_field(name="Before:", value=before.content, inline=False)
@@ -576,7 +576,7 @@ class Shiro(commands.Bot):
             title=":information_source:  **{}#{}**  Deleted message:".format(member.name, member.discriminator),
             description="** **",
             color=0x999999,
-            timestamp=message.timestamp
+            timestamp=message.created_at
         )
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name="Content:", value=message.content, inline=False)
@@ -615,7 +615,7 @@ class Shiro(commands.Bot):
                     self.send_log("Role Rxn +", "Added Anime Disc to {} ({})".format(user, user.id))
 
             elif reaction.emoji == "🇲":
-                if reaction.message.channel.id == self.channels.roles:
+                if reaction.message.channel == self.channels.roles:
                     await user.add_roles(self.roles.disc_manga)
                     self.send_log("Role Rxn +", "Added Manga Disc to {} ({})".format(user, user.id))
 
@@ -637,7 +637,7 @@ class Shiro(commands.Bot):
                     self.send_log("Role Rxn -", "Removed Anime Disc from {} ({})".format(user, user.id))
 
             elif reaction.emoji == "🇲":
-                if reaction.message.channel.id == self.channels.roles:
+                if reaction.message.channel == self.channels.roles:
                     await user.remove_roles(self.roles.disc_manga)
                     self.send_log("Role Rxn -", "Removed Manga Disc from {} ({})".format(user, user.id))
 
@@ -655,7 +655,7 @@ class Shiro(commands.Bot):
         embed = discord.Embed(
             title=":pushpin:  Pinboard vote **Initiated**.",
             description="**{}**/**{}**".format(1, self.pin_threshold),
-            timestamp=message.timestamp,
+            timestamp=message.created_at,
             color=0xbd3d45
         )
         embed_msg = await msg_channel.send(embed=embed)
@@ -674,7 +674,7 @@ class Shiro(commands.Bot):
                             embed = discord.Embed(
                                 title=":pushpin:  Pinboard vote **succeeded**!",
                                 description="**{}**/**{}**".format(pin_count, self.pin_threshold),
-                                timestamp=message.timestamp,
+                                timestamp=message.created_at,
                                 color=0x89af5b
                             )
                             await embed_msg.edit(embed=embed)
@@ -684,7 +684,7 @@ class Shiro(commands.Bot):
                             embed = discord.Embed(
                                 title=":pushpin:  Pinboard vote **Pending**:",
                                 description="**{}**/**{}**".format(pin_count, self.pin_threshold),
-                                timestamp=message.timestamp,
+                                timestamp=message.created_at,
                                 color=0xffa749
                             )
                             await embed_msg.edit(embed=embed)
@@ -703,13 +703,13 @@ class Shiro(commands.Bot):
             embed = discord.Embed(
                 title=":pushpin:  Pinboard vote **Failed**!",
                 description="**{}**/**{}**".format(pin_count, self.pin_threshold),
-                timestamp=message.timestamp,
+                timestamp=message.created_at,
                 color=0xbd3d45
             )
             await embed_msg.edit(embed=embed)
         else:
             self.send_log("Pinboard +", "({}) {}#{}: {} [{}]".format(
-                pin_count, message.author.name, message.author.discriminator, message.content, message.timestamp))
+                pin_count, message.author.name, message.author.discriminator, message.content, message.created_at))
 
             embed_title = "**Pinned message in *#{}:***".format(message.channel.name)
             embed_desc = ":pushpin: **x {}**\n─────────────────\n<@{}>:".format(pin_count, message.author.id,
@@ -729,7 +729,7 @@ class Shiro(commands.Bot):
             embed = discord.Embed(
                 title=embed_title,
                 description=embed_desc,
-                timestamp=message.timestamp,
+                timestamp=message.created_at,
                 color=0xbd3d45
             )
             embed.add_field(name=message.content, value="** **")
@@ -757,7 +757,7 @@ class Shiro(commands.Bot):
                             embed = discord.Embed(
                                 title=embed_title,
                                 description=embed_desc,
-                                timestamp=message.timestamp,
+                                timestamp=message.created_at,
                                 color=0xbd3d45
                             )
                             embed.add_field(name=message.content, value="** **")
@@ -859,7 +859,7 @@ class Shiro(commands.Bot):
             else:
                 docs_sent = discord.Embed(
                     title=":white_check_mark:  User Information **sent**!",
-                    timestamp=ctx.message.timestamp,
+                    timestamp=ctx.message.created_at,
                     color=0x89af5b
                 )
                 await ctx.send(embed=docs_sent)
@@ -867,7 +867,7 @@ class Shiro(commands.Bot):
         else:
             embed = discord.Embed(
                 title=":no_entry:  User **not found**!",
-                timestamp=ctx.message.timestamp,
+                timestamp=ctx.message.created_at,
                 color=0xa22c34
             )
             await ctx.send(embed=embed)
@@ -879,7 +879,7 @@ class Shiro(commands.Bot):
         else:
             docs_sent = discord.Embed(
                 title=":white_check_mark:  Documentations **sent**!",
-                timestamp=ctx.message.timestamp,
+                timestamp=ctx.message.created_at,
                 color=0x89af5b
             )
             msg = await ctx.send(embed=docs_sent)

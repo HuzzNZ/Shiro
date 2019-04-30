@@ -42,7 +42,7 @@ class CmdCog(commands.Cog):
             if not return_data:
                 embed = discord.Embed(
                     title=":no_entry:  Title __{}__ **not found**!".format(anime_id),
-                    timestamp=ctx.message.timestamp,
+                    timestamp=ctx.message.created_at,
                     color=0xa22c34
                 )
             else:
@@ -52,7 +52,7 @@ class CmdCog(commands.Cog):
             if not data:
                 embed = discord.Embed(
                     title=":no_entry:  Title __{}__ **not found**!".format(anime_id),
-                    timestamp=ctx.message.timestamp,
+                    timestamp=ctx.message.created_at,
                     color=0xa22c34
                 )
             else:
@@ -94,7 +94,7 @@ class CmdCog(commands.Cog):
             if not return_data:
                 embed = discord.Embed(
                     title=":no_entry:  Title __{}__ **not found**!".format(manga_id),
-                    timestamp=ctx.message.timestamp,
+                    timestamp=ctx.message.created_at,
                     color=0xa22c34
                 )
             else:
@@ -104,7 +104,7 @@ class CmdCog(commands.Cog):
             if not data:
                 embed = discord.Embed(
                     title=":no_entry:  Title __{}__ **not found**!".format(manga_id),
-                    timestamp=ctx.message.timestamp,
+                    timestamp=ctx.message.created_at,
                     color=0xa22c34
                 )
             else:
@@ -143,7 +143,7 @@ class CmdCog(commands.Cog):
         if not return_data:
             embed = discord.Embed(
                 title=":no_entry:  Title __{}__ **not found**!".format(anime_id),
-                timestamp=ctx.message.timestamp,
+                timestamp=ctx.message.created_at,
                 color=0xa22c34
             )
         else:
@@ -158,7 +158,7 @@ class CmdCog(commands.Cog):
                 except (IndexError, KeyError):
                     embed = discord.Embed(
                         title=":no_entry:  __{}__ **not currently releasing**!".format(data["title"]["romaji"]),
-                        timestamp=ctx.message.timestamp,
+                        timestamp=ctx.message.created_at,
                         color=0xa22c34
                     )
         if fetch_embed:
