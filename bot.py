@@ -659,6 +659,11 @@ class Shiro(commands.Bot):
             color=0xbd3d45
         )
         embed_msg = await msg_channel.send(embed=embed)
+        if not message.content:
+            content = "*No Content*"
+        else:
+            content = message.content
+
         for i in range(0, 600):
             await asyncio.sleep(0.05)
             message = await msg_channel.fetch_message(id=message.id)
@@ -669,7 +674,7 @@ class Shiro(commands.Bot):
                     pin_count = reaction.count
                     if pc_now != pin_count:
                         self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
-                            message.content, pin_count))
+                            content, pin_count))
                         if pin_count >= self.pin_threshold:
                             embed = discord.Embed(
                                 title=":pushpin:  Pinboard vote **succeeded**!",
@@ -708,11 +713,6 @@ class Shiro(commands.Bot):
             )
             await embed_msg.edit(embed=embed)
         else:
-            if not message.content:
-                content = "*No Content*"
-            else:
-                content = message.content
-
             self.send_log("Pinboard +", "({}) {}#{}: {} [{}]".format(
                 pin_count, message.author.name, message.author.discriminator, content, message.created_at))
 
@@ -724,16 +724,19 @@ class Shiro(commands.Bot):
             embed_url = None
             if message.embeds:
                 has_embed = True
-                self.send_log("Pinboard", "Pinned Message {} has embed!".format(message.id))
                 for i in message.embeds:
                     i = i.to_dict()
                     if i["type"] != "image":
                         has_embed = False
                     else:
                         embed_url = i["url"]
-                        print(embed_url)
                         has_embed = True
                         break
+            elif message.attachments:
+                has_embed = True
+                for i in message.attachments:
+                    embed_url = i.url
+                    break
             embed = discord.Embed(
                 title=embed_title,
                 description=embed_desc,
@@ -758,7 +761,7 @@ class Shiro(commands.Bot):
                         pin_count = reaction.count
                         if pc_now != pin_count:
                             self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
-                                message.content, pin_count))
+                                content, pin_count))
 
                             embed_desc = ":pushpin: **x {} ** in <#{}>:\n─────────────────\n<@{}>:".format(
                                 pin_count,
