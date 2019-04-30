@@ -88,7 +88,7 @@ class Shiro(commands.Bot):
 
         # Starting the bot
         self.send_log("Bot Client", "Starting process")
-        self.ontime_loop = asyncio.ensure_future(self.ontime_loop)
+        self.ontime_loop = asyncio.ensure_future(self.on_time_loop())
 
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
