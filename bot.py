@@ -726,11 +726,11 @@ class Shiro(commands.Bot):
                 has_embed = True
                 self.send_log("Pinboard", "Pinned Message {} has embed!".format(message.id))
                 for i in message.embeds:
-                    print(i.to_dict())
-                    if not i.image.url or i.image.url is discord.Embed.Empty:
+                    i = i.to_dict()
+                    if i["type"] != "image":
                         has_embed = False
                     else:
-                        embed_url = i.image.url
+                        embed_url = i["url"]
                         print(embed_url)
                         has_embed = True
                         break
