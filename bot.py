@@ -717,7 +717,7 @@ class Shiro(commands.Bot):
                 pin_count, message.author.name, message.author.discriminator, content, message.created_at))
 
             embed_title = "**Pinned message:**".format(message.channel.name)
-            embed_desc = ":pushpin: **x {}**  in <#{}>:\n─────────────────\n<@{}>:".format(pin_count,
+            embed_desc = ":pushpin: **x {} ** in <#{}>:\n─────────────────\n<@{}>:".format(pin_count,
                                                                                            message.channel.id,
                                                                                            message.author.id)
             has_embed = False
@@ -726,10 +726,11 @@ class Shiro(commands.Bot):
                 has_embed = True
                 self.send_log("Pinboard", "Pinned Message {} has embed!".format(message.id))
                 for i in message.embeds:
-                    if not i.image or i.image is discord.Embed.Empty:
+                    if not i.image.url or i.image.url is discord.Embed.Empty:
                         has_embed = False
                     else:
                         embed_url = i.image.url
+                        print(embed_url)
                         has_embed = True
                         break
             embed = discord.Embed(
@@ -758,9 +759,9 @@ class Shiro(commands.Bot):
                             self.send_log("Pinboard", "Another pin added on message \"{}\", now {}".format(
                                 message.content, pin_count))
 
-                            embed_desc = ":pushpin: **x {}**  in <#{}>:\n─────────────────\n<@{}>:".format(
-                                message.channel.id,
+                            embed_desc = ":pushpin: **x {} ** in <#{}>:\n─────────────────\n<@{}>:".format(
                                 pin_count,
+                                message.channel.id,
                                 message.author.id
                             )
                             embed = discord.Embed(
