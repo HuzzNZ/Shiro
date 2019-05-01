@@ -882,7 +882,7 @@ class Shiro(commands.Bot):
             embed.set_footer(icon_url=self.user.avatar_url,
                              text="User info of {} - requested by {}".format(user, ctx.message.author))
 
-            if ctx.message.channel.id == "557469450668998657" or ctx.message.channel.id == "557033330470813697":
+            if ctx.channel.id == self.channels.docs.id or ctx.channel.id == self.channels.staff_bot.id:
                 await ctx.send(embed=embed)
             else:
                 docs_sent = self.basic_embed(True, "User Information **sent**!")
@@ -893,7 +893,7 @@ class Shiro(commands.Bot):
             await ctx.send(embed=embed)
 
     async def send_docs(self, ctx: discord.ext.commands.Context, embed):
-        if ctx.channel == self.channels.docs or ctx.channel == self.channels.staff_bot:
+        if ctx.channel.id == self.channels.docs.id or ctx.channel.id == self.channels.staff_bot.id:
             await ctx.send(embed=embed)
 
         else:
