@@ -93,13 +93,7 @@ class Shiro(commands.Bot):
         self.start_time = datetime.utcnow()
         self.load_extension("cogs.commands")
         self.load_extension("cogs.mod_only")
-        while True:
-            try:
-                self.run(self.token)
-            except ConnectionResetError:
-                self.send_log("Bot Client", "ConnectionResetError. Attempting reconnect.")
-            except Exception as error:
-                self.send_log("CLIENTERRO", str(error))
+        self.run(self.token)
 
     @staticmethod
     def send_log(title: str, message: str):
@@ -399,16 +393,9 @@ class Shiro(commands.Bot):
     #                          #
     # ======================== #
 
-    async def on_connect(self):
-        self.ontime_loop = asyncio.ensure_future(self.on_time_loop())
-        self.send_log("----------", "Connect")
-
     async def on_ready(self):
+        await self.on_time_loop()
         self.send_log("Bot Client", "Ready on Discord")
-
-    async def on_disconnect(self):
-        self.ontime_loop.cancel()
-        self.send_log("----------", "Disconnect")
 
     async def on_message(self, message: discord.Message):
         content = message.content
