@@ -857,9 +857,8 @@ class Shiro(commands.Bot):
             roles_str = ""
             user_roles = user.roles
             user_roles.reverse()
-            print(user_roles)
             for role in user_roles:
-                if role.is_default:
+                if role.is_default():
                     continue
                 elif role == self.roles.spacer_pings or role == self.roles.spacer_special:
                     continue
@@ -867,7 +866,6 @@ class Shiro(commands.Bot):
                     roles_str += role.mention
                     roles_str += ","
                     roles_str += " "
-            print(roles_str)
             roles_str = f"**{roles_str[:-2]}**"
 
             embed = discord.Embed(
