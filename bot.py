@@ -860,8 +860,7 @@ class Shiro(commands.Bot):
             for role in user_roles:
                 if role.is_default:
                     continue
-                elif role == get(ctx.message.server.roles, id=self.roles.spacer_pings) or role == get(
-                        ctx.message.server.roles, id=self.roles.spacer_special):
+                elif role == self.roles.spacer_pings or role == self.roles.spacer_special:
                     continue
                 else:
                     roles_str += role.mention
