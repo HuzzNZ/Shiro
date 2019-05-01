@@ -142,8 +142,7 @@ class CmdCog(commands.Cog):
                         fetch_embed = True
                 except (IndexError, KeyError):
                     embed = self.bot.basic_embed(
-                        False, 
-                        "__{}__ **not currently releasing**!".format(data["title"]["romaji"])
+                        False, "__{}__ **not currently releasing**!".format(data["title"]["romaji"])
                     )
         if fetch_embed:
             new_data = await build_next_ep_embed(data)
@@ -189,8 +188,7 @@ class CmdCog(commands.Cog):
             color=0xcc606d
         )
         embed.set_footer(
-            text="{}-sided dice roll - requested by {}".format(side, ctx.author),
-            icon_url=self.bot.user.avatar_url
+            text="{}-sided dice roll - requested by {}".format(side, ctx.author)
         )
         await ctx.send(embed=embed)
 
@@ -213,8 +211,7 @@ class CmdCog(commands.Cog):
             color=color
         )
         embed.set_footer(
-            text="Cointoss - requested by {}".format(ctx.author),
-            icon_url=self.bot.user.avatar_url
+            text="Cointoss - requested by {}".format(ctx.author)
         )
         await ctx.send(embed=embed)
 
@@ -230,8 +227,7 @@ class CmdCog(commands.Cog):
                 reg_user += 1
 
         await ctx.send(":small_blue_diamond: Currently in the server:\n        **{}** Members + **{}** Bots".format(
-            reg_user, bot_user
-        ))
+            reg_user, bot_user))
 
     @commands.command()
     async def mywaifu(self, ctx, opt: str = None, *waifu_name: str):
@@ -258,6 +254,7 @@ class CmdCog(commands.Cog):
                 )
                 embed.set_footer(text="Use !help mywaifu for more information on the command.")
                 await ctx.send(embed=embed)
+            return
         opt = opt.lower()
         name = ""
         if waifu_name:

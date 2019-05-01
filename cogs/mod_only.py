@@ -7,6 +7,8 @@ from bot import Shiro
 from util import strfdelta
 from anilist_api import find_anime_by_id
 
+import asyncio
+
 
 class ModsCog(commands.Cog):
     def __init__(self, bot: Shiro):
@@ -33,9 +35,8 @@ class ModsCog(commands.Cog):
                 delete_from = i * 100
                 delete_to = (i + 1) * 100
                 await ctx.channel.delete_messages(purge_list[delete_from:delete_to])
-            embed = self.bot.basic_embed(True, "**{}** messages have been deleted!")
+            embed = self.bot.basic_embed(True, "**{}** messages have been deleted!".format(amount_deleted))
             message = await ctx.send(embed=embed)
-            await message.delete(delay=10)
             self.bot.send_log(
                 "Msg Purge",
                 f"{ctx.message.author}: Purged {amount_deleted} messages in {ctx.message.channel} - "
@@ -43,8 +44,10 @@ class ModsCog(commands.Cog):
             self.bot.send_log("Msg Purge", "====================================================================")
             for message in purge_list:
                 user_name = f"{message.author}".ljust(18, " ")
-                print(f"[{message.timestamp}] {user_name}: {message.content}")
+                print(f"[{message.created_at}] {user_name}: {message.content}")
             self.bot.send_log("Msg Purge", "====================================================================")
+            await asyncio.sleep(10)
+            await message.delete()
 
     @commands.command()
     async def echo(self, ctx, destination, *args):
@@ -54,7 +57,11 @@ class ModsCog(commands.Cog):
                 message += (string + " ")
             message = message.strip()
             dest_channel_id = destination.replace("<", "").replace(">", "").replace("#", "")
-            dest_channel = get(ctx.guild.channels, id=int(dest_channel_id))
+            try:
+                dest_channel_id = int(dest_channel_id)
+                dest_channel = get(ctx.guild.channels, id=int(dest_channel_id))
+            except ValueError:
+                dest_channel = get(ctx.guild.channels, name=dest_channel_id)
             if not dest_channel:
                 dest_channel = get(ctx.guild.channels, name=destination)
             if isinstance(dest_channel, discord.TextChannel):
@@ -97,7 +104,7 @@ class ModsCog(commands.Cog):
                     if ismuted:
                         self.bot.send_log("Unmute", "{}: Unmute pending user {}({}) found: Removing mute.".format(
                             ctx.author, user_id, unmuted_user))
-                        unmuted_user.remove_roles(self.bot.roles.muted)
+                        await unmuted_user.remove_roles(self.bot.roles.muted)
                         embed = self.bot.basic_embed(True, "User **Unmuted**!")
                     else:
                         self.bot.send_log("Unmute", "{}: Unmute pending user {}({}) found: ERROR! "
@@ -181,7 +188,7 @@ class ModsCog(commands.Cog):
         if self.bot.is_mod(ctx.author):
             loading = discord.Embed(
                 title=":hourglass:  **Refreshing** embeds for *#24h*  channel...",
-                timestamp=ctx.message.timestamp,
+                timestamp=ctx.message.created_at,
                 color=0xffa749
             )
             msg = await ctx.send(embed=loading)
@@ -189,7 +196,7 @@ class ModsCog(commands.Cog):
             await self.bot.refresh_24h()
             embed = discord.Embed(
                 title=":white_check_mark:  **Refreshed** embeds for *#24h*  channel!",
-                timestamp=ctx.message.timestamp,
+                timestamp=ctx.message.created_at,
                 color=0x89af5b
             )
             await msg.edit(embed=embed)
@@ -215,7 +222,7 @@ class ModsCog(commands.Cog):
                     title=":notepad_spiral: **Currently tracking anime:**",
                     description=desc,
                     color=0xcdd4db,
-                    timestamp=datetime.now()
+                    timestamp=datetime.utcnow()
                 )
                 await ctx.send(embed=embed)
             else:
@@ -229,15 +236,33 @@ class ModsCog(commands.Cog):
                                     duplicate = True
                     title = data["title"]["romaji"]
                     if not duplicate:
-                        to_append = {
-                            str(data["id"]): {
-                                "title": title
+                        is_releasing = False
+                        status = data["status"]
+                        if status.lower() == "releasing":
+                            is_releasing = True
+                        else:
+                            try:
+                                x = data["airingSchedule"]["edges"][0]["node"]["episode"]
+                                if x:
+                                    is_releasing = True
+                            except (IndexError, KeyError):
+                                embed = self.bot.basic_embed(
+                                    False, "__{}__ **not currently releasing**!".format(data["title"]["romaji"]))
+                                await ctx.send(embed=embed)
+                                return
+                        if is_releasing:
+                            to_append = {
+                                str(data["id"]): {
+                                    "title": title
+                                }
                             }
-                        }
-                        await self.bot.append_tracking(to_append)
-                        self.bot.send_log("Tracking", "Started tracking {} ({}) by {}".format(
-                            title, data["id"], ctx.author))
-                        embed = self.bot.basic_embed(True, "Started tracking **{}**!".format(title))
+                            await self.bot.append_tracking(to_append)
+                            self.bot.send_log("Tracking", "Started tracking {} ({}) by {}".format(
+                                title, data["id"], ctx.author))
+                            embed = self.bot.basic_embed(True, "Started tracking **{}**!".format(title))
+                        else:
+                            embed = self.bot.basic_embed(
+                                False, "__{}__ **not currently releasing**!".format(data["title"]["romaji"]))
                     else:
                         embed = self.bot.basic_embed(False, "Already tracking **{}**!".format(title))
                 else:

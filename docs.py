@@ -297,8 +297,8 @@ class Docs:
                  "name": "Removing your waifu",
 
                  "usages": [
-                     "!mywaifu delete <name>",
-                     "!mywaifu isnolonger <name>"
+                     "!mywaifu delete",
+                     "!mywaifu isnolonger"
                  ],
 
                  "function": "Removes your current waifu."

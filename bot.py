@@ -844,7 +844,7 @@ class Shiro(commands.Bot):
         self.send_log("Role -", "Deleted role \"{}\" by {}".format(waifu_role.name, ctx.message.author))
 
     async def userinfo_embed(self, ctx: discord.ext.commands.Context, user):
-        if isinstance(user, discord.Member):
+        if user:
             if user.nick:
                 title = f":information_source:  **{user.nick}** AKA **{user.name}**:"
             else:
@@ -858,7 +858,7 @@ class Shiro(commands.Bot):
             user_roles = user.roles
             user_roles.reverse()
             for role in user_roles:
-                if role.is_everyone:
+                if role.is_default:
                     continue
                 elif role == get(ctx.message.server.roles, id=self.roles.spacer_pings) or role == get(
                         ctx.message.server.roles, id=self.roles.spacer_special):
