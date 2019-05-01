@@ -178,7 +178,7 @@ class Shiro(commands.Bot):
 
         self.role_ids = self.constants["roles"]
         Role = namedtuple("Role", "kitsune member spacer_pings spacer_special "
-                                  "news_server news_anime disc_anime disc_manga waifu_start waifu_end muted")
+                                  "news_server news_anime disc_anime disc_manga waifu_start muted")
 
         kitsune = get(self.senko_guild.roles, id=int(self.role_ids["kitsune"]))
         member = self.senko_guild.get_role(int(self.role_ids["member"]))
@@ -189,11 +189,10 @@ class Shiro(commands.Bot):
         disc_anime = get(self.senko_guild.roles, id=int(self.role_ids["disc-anime"]))
         disc_manga = get(self.senko_guild.roles, id=int(self.role_ids["disc-manga"]))
         waifu_start = get(self.senko_guild.roles, id=int(self.role_ids["waifu-start"]))
-        waifu_end = get(self.senko_guild.roles, id=int(self.role_ids["waifu-end"]))
         muted = get(self.senko_guild.roles, id=int(self.role_ids["muted"]))
 
         self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
-                          disc_manga, waifu_start, waifu_end, muted)
+                          disc_manga, waifu_start, muted)
 
     # ======================== #
     #                          #
