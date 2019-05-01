@@ -151,6 +151,11 @@ class Shiro(commands.Bot):
             return True
         return False
 
+    async def append_tracking(self, dict_):
+        self.tracking.append(dict_)
+        with open(self.track_file, "w", encoding="UTF-8") as writefile:
+            json.dump(self.tracking, writefile)
+
     async def define_constants(self):
         self.senko_guild = self.get_guild(int(self.constants['guild']))
 

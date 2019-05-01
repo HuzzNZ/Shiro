@@ -32,6 +32,7 @@ def strfdelta(tdelta):
 
 def delta_clean_up(delta_string):
     new_string = ""
+    last_letter = None
     for letter in delta_string:
         if not letter == " ":
             new_string += letter
@@ -106,13 +107,13 @@ async def build_embed(data):
         else:
             studio = "TBA"
 
-        tv_format = data["format"]
-
         season_int = data["seasonInt"]
         try:
             season_str = await season_int_to_str(season_int)
-        except Exception:
+        except Exception as error:
             season_str = "--"
+            if error:
+                pass
 
         status = str(data["status"]).capitalize()
         if status.lower() == "not_yet_released":
@@ -120,7 +121,6 @@ async def build_embed(data):
         score = data["meanScore"]
         if not score:
             score = "--"
-        avg_score = data["averageScore"]
 
         genres = data["genres"]
         genres_str = ""
@@ -279,7 +279,6 @@ async def build_small_embed(data):
         score = data["meanScore"]
         if not score:
             score = "--"
-        avg_score = data["averageScore"]
 
         genres = data["genres"]
         genres_str = ""

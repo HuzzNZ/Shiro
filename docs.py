@@ -1,16 +1,16 @@
 from discord import Embed
 
 
-subcommand = {
-    "name": "Adding your waifu",
-
-    "usages": [
-        "!mywaifu is <name>",
-        "!mywaifu add <name>"
-    ],
-
-    "function": "Adds a Special Role under your roles of a waifu you specified. Max 24 Chars."
-},
+# subcommand = {
+#     "name": "Adding your waifu",
+#
+#     "usages": [
+#         "!mywaifu is <name>",
+#         "!mywaifu add <name>"
+#     ],
+#
+#     "function": "Adds a Special Role under your roles of a waifu you specified. Max 24 Chars."
+# }
 
 
 class Command:
@@ -341,4 +341,3 @@ class Docs:
 
 if __name__ == "__main__":
     docs = Docs()
-

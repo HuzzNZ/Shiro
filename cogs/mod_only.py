@@ -5,6 +5,7 @@ from datetime import datetime
 
 from bot import Shiro
 from util import strfdelta
+from anilist_api import find_anime_by_id
 
 
 class ModsCog(commands.Cog):
@@ -101,7 +102,7 @@ class ModsCog(commands.Cog):
                     else:
                         self.bot.send_log("Unmute", "{}: Unmute pending user {}({}) found: ERROR! "
                                                     "User is not muted.".format(
-                            ctx.message.author, user_id, unmuted_user))
+                                                        ctx.message.author, user_id, unmuted_user))
                         embed = self.bot.basic_embed(False, "User is **not muted**!")
                 else:
                     self.bot.send_log("Unmute", "{}: Unmute pending user {}({}) not found.".format(
@@ -115,35 +116,134 @@ class ModsCog(commands.Cog):
 
     @commands.command()
     async def ban(self, ctx, user_id):
-        pass
-        # if self.bot.is_mod(ctx.author):
-        #     user_id = self.bot.mention_cleanup(user_id)
-        #     try:
-        #         ban_user = self.bot.senko_guild.get_member(int(user_id))
-        #         if ban_user:
-        #             self.bot.send_log("Ban", "{}: Ban pending user {}({}) found: Banning.".format(
-        #                 ctx.message.author, user_id, ban_user))
-        #             await self.bot.senko_guild.ban(ban_user)
-        #         else:
-        #             fake_member = discord.Object(id=int(user_id))
-        #             await self.bot.senko_guild.ban(fake_member)
-        #             self.bot.send_log("Ban", "{}: Ban pending user {}({}) not found in server: Fake Banning.".format(
-        #                 ctx.message.author, user_id, ban_user))
-        #
-        #         embed = discord.Embed(
-        #             title=":white_check_mark:  User **Banned**!",
-        #             timestamp=ctx.message.timestamp,
-        #             color=0x89af5b
-        #         )
-        #         await bot.say(embed=embed)
-        #     except (discord.NotFound, TypeError):
-        #         print("[Ban       ] {}: Ban pending user {} not found.".format(ctx.message.author, user_id))
-        #         embed = discord.Embed(
-        #             title=":no_entry:  User **not found**!",
-        #             timestamp=ctx.message.timestamp,
-        #             color=0xa22c34
-        #         )
-        #         await bot.say(embed=embed)
+        if self.bot.is_mod(ctx.author):
+            user_id = self.bot.mention_cleanup(user_id)
+            try:
+                ban_user = self.bot.senko_guild.get_member(int(user_id))
+                if ban_user:
+                    self.bot.send_log("Ban", "{}: Ban pending user {}({}) found: Banning.".format(
+                        ctx.message.author, user_id, ban_user))
+                    await self.bot.senko_guild.ban(ban_user)
+                else:
+                    fake_member = discord.Object(id=int(user_id))
+                    await self.bot.senko_guild.ban(fake_member)
+                    self.bot.send_log("Ban", "{}: Ban pending user {}({}) not found in server: Fake Banning.".format(
+                        ctx.message.author, user_id, ban_user))
+
+                embed = self.bot.basic_embed(True, "User **banned**!")
+                await ctx.send(embed=embed)
+            except (discord.NotFound, TypeError):
+                self.bot.send_log("Ban", "{}: Ban pending user {} not found.".format(ctx.message.author, user_id))
+                embed = self.bot.basic_embed(False, "User **not found**!")
+                await ctx.send(embed=embed)
+
+    @commands.command()
+    async def unban(self, ctx, user_id):
+        if self.bot.is_mod(ctx.author):
+            user_id = self.bot.mention_cleanup(user_id)
+            if get(self.bot.senko_guild.members, id=int(user_id)):
+                embed = self.bot.basic_embed(False, "User is **not banned**!")
+                await ctx.send(embed=embed)
+            else:
+                try:
+                    fake_member = discord.Object(id=int(user_id))
+                    await self.bot.senko_guild.unban(fake_member)
+                    self.bot.send_log("Unban", "{}: Unban pending user {}({}) not found in server: Unbanning.".format(
+                        ctx.message.author, user_id, fake_member))
+                    embed = self.bot.basic_embed(True, "User **unbanned**!")
+                    await ctx.send(embed=embed)
+                except discord.NotFound:
+                    self.bot.send_log("Unban", "{}: Unban pending user {} not found.".format(
+                        ctx.message.author, user_id))
+                    embed = self.bot.basic_embed(False, "User **not found**!")
+                    await ctx.send(embed=embed)
+
+    @commands.command()
+    async def pingrole(self, ctx, role):
+        if self.bot.is_mod(ctx.author):
+            role = role.lower()
+            if role == "server" or role == "s":
+                role = self.bot.roles.news_server
+            elif role == "anime" or role == "a":
+                role = self.bot.roles.news_anime
+            else:
+                embed = self.bot.basic_embed(False, "Role {} **not found**!".format(role))
+                await ctx.send(embed=embed)
+                return
+            await ctx.message.delete()
+            await role.edit(mentionable=True)
+            await ctx.send(content=role.mention)
+            await role.edit(mentionable=False)
+            await ctx.send("** **")
+
+    @commands.command()
+    async def mrf(self, ctx):
+        if self.bot.is_mod(ctx.author):
+            loading = discord.Embed(
+                title=":hourglass:  **Refreshing** embeds for *#24h*  channel...",
+                timestamp=ctx.message.timestamp,
+                color=0xffa749
+            )
+            msg = await ctx.send(embed=loading)
+            await msg.edit(embed=loading)
+            await self.bot.refresh_24h()
+            embed = discord.Embed(
+                title=":white_check_mark:  **Refreshed** embeds for *#24h*  channel!",
+                timestamp=ctx.message.timestamp,
+                color=0x89af5b
+            )
+            await msg.edit(embed=embed)
+
+    @commands.command()
+    async def track(self, ctx, aid):
+        if self.bot.is_mod(ctx.author):
+            if aid == "-l":
+                desc = "─────────────────"
+                for i in self.bot.tracking:
+                    title_name = None
+                    animeid = None
+                    for key, value in i.items():
+                        animeid = key
+                        for k, v in value.items():
+                            title_name = v
+
+                    if len(title_name) >= 41:
+                        title_name = title_name[:40].strip() + "..."
+                    str_to_add = "\n`{}` - {}".format(str(animeid).rjust(6, "0"), title_name)
+                    desc += str_to_add
+                embed = discord.Embed(
+                    title=":notepad_spiral: **Currently tracking anime:**",
+                    description=desc,
+                    color=0xcdd4db,
+                    timestamp=datetime.now()
+                )
+                await ctx.send(embed=embed)
+            else:
+                data = await find_anime_by_id(aid)
+                if data:
+                    duplicate = False
+                    if self.bot.tracking:
+                        for i in self.bot.tracking:
+                            for key, value in i.items():
+                                if str(key) == str(data["id"]):
+                                    duplicate = True
+                    title = data["title"]["romaji"]
+                    if not duplicate:
+                        to_append = {
+                            str(data["id"]): {
+                                "title": title
+                            }
+                        }
+                        await self.bot.append_tracking(to_append)
+                        self.bot.send_log("Tracking", "Started tracking {} ({}) by {}".format(
+                            title, data["id"], ctx.author))
+                        embed = self.bot.basic_embed(True, "Started tracking **{}**!".format(title))
+                    else:
+                        embed = self.bot.basic_embed(False, "Already tracking **{}**!".format(title))
+                else:
+                    embed = self.bot.basic_embed(False, "No anime with ID **{}** found!".format(aid))
+                    embed.set_footer(text="Use !anime <name> -id to get the anilist ID.")
+                await ctx.send(embed=embed)
 
 
 def setup(bot):
