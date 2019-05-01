@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord.utils import get
 import discord
 
 from bot import Shiro
@@ -10,6 +11,10 @@ from anilist_api import find_anime_by_id
 from anilist_api import find_anime_by_name
 from anilist_api import find_manga_by_id
 from anilist_api import find_manga_by_name
+
+from math import floor
+import math
+import random
 
 
 class CmdCog(commands.Cog):
@@ -165,6 +170,327 @@ class CmdCog(commands.Cog):
             new_data = await build_next_ep_embed(data)
             embed = new_data[0]
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def waifu(self, ctx, wid=None):
+        if not wid:
+            num = floor(random.random() * 100000)
+        else:
+            num = int(wid)
+        embed = discord.Embed()
+        embed.add_field(name="**This waifu is not real**", value="**#{}**".format(num))
+        embed.set_image(url="https://www.thiswaifudoesnotexist.net/example-{}.jpg".format(num))
+        embed.set_author(name="StyleGAN by Gwern Branwen", url="https://www.gwern.net/")
+        embed.set_footer(icon_url=self.bot.user.avatar_url, text="Random Waifu - requested by {}".format(
+            ctx.author
+        ))
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def dice(self, ctx, side=None):
+        if side:
+            err_message = ""
+            try:
+                side = int(side)
+                if side > 999999999:
+                    err_message = ":no_entry:  Number cannot be larger than **1,000,000,000**!"
+                    raise ValueError
+
+            except ValueError:
+                if not err_message:
+                    err_message = ":no_entry:  **{}** is not a valid number!".format(side)
+                embed = discord.Embed(
+                    title=err_message,
+                    timestamp=ctx.message.timestamp,
+                    color=0xa22c34
+                )
+                await ctx.send(embed=embed)
+                return
+        else:
+            side = 6
+
+        random_roll = math.ceil(random.random() * float(side))
+        embed = discord.Embed(
+            title=":game_die:  You rolled a **{}**!".format(random_roll),
+            color=0xcc606d
+        )
+        embed.set_footer(
+            text="{}-sided dice roll - requested by {}".format(side, ctx.author),
+            icon_url=self.bot.user.avatar_url
+        )
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def cointoss(self, ctx):
+        random_choice = math.ceil(random.random() * 2.0)
+        choice = None
+        emoji = None
+        color = None
+        if random_choice == 1:
+            choice = "Heads"
+            emoji = ":dvd:"
+            color = 0xf4d887
+        elif random_choice == 2:
+            choice = "Tails"
+            emoji = ":cd:"
+            color = 0x8c97a3
+        embed = discord.Embed(
+            title="{}  You tossed **{}**!".format(emoji, choice),
+            color=color
+        )
+        embed.set_footer(
+            text="Cointoss - requested by {}".format(ctx.author),
+            icon_url=self.bot.user.avatar_url
+        )
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def members(self, ctx):
+        members = list(ctx.guild.members)
+        bot_user = 0
+        reg_user = 0
+        for i in members:
+            if i.bot:
+                bot_user += 1
+            else:
+                reg_user += 1
+
+        await ctx.send(":small_blue_diamond: Currently in the server:\n        **{}** Members + **{}** Bots".format(
+            reg_user, bot_user
+        ))
+
+    @commands.command()
+    async def mywaifu(self, ctx, opt: str = None, *waifu_name: str):
+        if not opt:
+            list_roles = ctx.author.roles
+            has_waifu = False
+            self_waifu = None
+            if list_roles[1] < self.bot.roles.waifu_start:
+                has_waifu = True
+                self_waifu = list_roles[1]
+            if has_waifu:
+                embed = discord.Embed(
+                    title=":heart:  Your waifu is **{}**!".format(self_waifu.name),
+                    description="",
+                    color=0xbe1931
+                )
+                embed.set_footer(text="Use !help mywaifu for more information on the command.")
+                await ctx.send(embed=embed)
+            else:
+                embed = discord.Embed(
+                    title=":broken_heart:  **You don't currently have a waifu!**",
+                    description="",
+                    color=0xe75a70
+                )
+                embed.set_footer(text="Use !help mywaifu for more information on the command.")
+                await ctx.send(embed=embed)
+        opt = opt.lower()
+        name = ""
+        if waifu_name:
+            for part in waifu_name:
+                name += part
+                name += " "
+            name = name.strip()
+        else:
+            pass
+        blacklist = [
+            "nigga", "nibba", "nigger", "gay", "anus", "penis", "vagina", "faggot", "fag", "tranny",
+            "kirino from oreimo"
+        ]
+        inappropriate = False
+        for word in blacklist:
+            if word in name.lower():
+                inappropriate = True
+                break
+        if inappropriate:
+            embed = discord.Embed(
+                title=":no_entry:  **I don't think that's an appropriate name...**",
+                description="Try again with a different name.",
+                color=0xa22c34
+            )
+            await ctx.send(embed=embed)
+            return
+        if opt == "is" or opt == "add":
+            if name.__len__() > 24:
+                embed = discord.Embed(
+                    title=":no_entry:  Your waifu's name is **too long**!",
+                    description="Currently **{}**/24 chars.".format(name.__len__()),
+                    color=0xa22c34
+                )
+                await ctx.send(embed=embed)
+                return
+            else:
+                list_roles = ctx.author.roles
+                has_waifu = False
+                self_waifu = None
+                if list_roles[1] < self.bot.roles.waifu_start:
+                    has_waifu = True
+                    self_waifu = list_roles[1]
+                if has_waifu:
+                    embed = discord.Embed(
+                        title=":no_entry:  **You already have a waifu!**",
+                        description="Please be loyal to **{}**.".format(self_waifu.name),
+                    )
+                    embed.set_footer(text="Use !mywaifu isnow <name> to change your waifu.")
+                    await ctx.send(embed=embed)
+                else:
+                    await self.bot.add_waifu_role(name, ctx)
+                    list_messages = [
+                        "Treat her well",
+                        "Be nice to her",
+                        "Be loyal",
+                    ]
+                    embed = discord.Embed(
+                        title=":white_check_mark:  Waifu **{}** added!".format(name),
+                        description="*{}, {}.*".format(random.choice(list_messages), ctx.message.author.mention),
+                        color=0x89af5b
+                    )
+                    await ctx.send(embed=embed)
+        elif opt == "isnow" or opt == "edit" or opt == "change" or opt == "changeto":
+            if name.__len__() > 24:
+                embed = discord.Embed(
+                    title=":no_entry:  Your waifu's name is **too long**!",
+                    description="Currently **{}**/24 chars.".format(name.__len__()),
+                    color=0xa22c34
+                )
+                await ctx.send(embed=embed)
+                return
+            else:
+                list_roles = ctx.message.author.roles
+                has_waifu = False
+                if list_roles[1] < self.bot.roles.waifu_start:
+                    has_waifu = True
+                if not has_waifu:
+                    embed = discord.Embed(
+                        title=":no_entry:  **You don't have a waifu yet!**",
+                        description="",
+                        color=0xa22c34
+                    )
+                    embed.set_footer(text="Use !mywaifu is <name> to add her.")
+                    await ctx.send(embed=embed)
+                    return
+                else:
+                    old_waifu = ctx.author.roles[1].name
+                    await self.bot.delete_waifu_role(ctx.message.author.roles[1], ctx)
+                    await self.bot.add_waifu_role(name, ctx)
+                    list_messages = [
+                        "For {} to be replaced by someone like her.. *sobs*",
+                        "It.. It's not like {} wanted to be your waifu or anything!",
+                        "Goodbye. {} won't ever miss you."
+                    ]
+                    embed = discord.Embed(
+                        title=":white_check_mark:  Waifu changed to **{}**!".format(name),
+                        description=random.choice(list_messages).format(old_waifu),
+                        color=0x89af5b
+                    )
+                    await ctx.send(embed=embed)
+        elif opt == "remove" or opt == "delete" or opt == "reset" or opt == "isnolonger":
+            list_roles = ctx.message.author.roles
+            has_waifu = False
+            if list_roles[1] < self.bot.roles.waifu_start:
+                has_waifu = True
+            if not has_waifu:
+                embed = discord.Embed(
+                    title=":no_entry:  **You don't have a waifu yet!**",
+                    description="",
+                    color=0xa22c34
+                )
+                embed.set_footer(text="Use !mywaifu is <name> to add her.")
+                await ctx.send(embed=embed)
+                return
+            else:
+                self_waifu = ctx.author.roles[1]
+                await self.bot.delete_waifu_role(self_waifu, ctx)
+                embed = discord.Embed(
+                    title=":white_check_mark:  Waifu **Removed**.".format(name),
+                    description="Goodbye forever, {}.".format(self_waifu),
+                    color=0x89af5b
+                )
+                await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(
+                title=":no_entry:  Unknown Command!",
+                description="",
+                color=0xa22c34
+            )
+            embed.set_footer(text="Use !help mywaifu for more information.")
+            await ctx.send(embed=embed)
+
+    @commands.command()
+    async def userinfo(self, ctx: discord.ext.commands.Context, *user_input):
+        if not user_input:
+            user = ctx.author
+        else:
+            user = ""
+            for i in user_input:
+                user += i
+                user += " "
+            user = user.strip()
+            members = ctx.guild.members
+            if "@" in user:
+                user_id = self.bot.mention_cleanup(user)
+                user = get(members, id=user_id)
+            else:
+                try:
+                    user_id = int(user)
+                    user = get(members, id=user_id)
+                except ValueError:
+                    user_name = user
+                    user = get(members, name=user_name)
+
+        await self.bot.userinfo_embed(ctx, user)
+
+    @commands.command()
+    async def whois(self, ctx, *user_input):
+        if not user_input:
+            user = ctx.author
+        else:
+            user = ""
+            for i in user_input:
+                user += i
+                user += " "
+            user = user.strip()
+            members = ctx.guild.members
+            if "@" in user:
+                user_id = self.bot.mention_cleanup(user)
+                user = get(members, id=user_id)
+            else:
+                try:
+                    user_id = int(user)
+                    user = get(members, id=user_id)
+                except ValueError:
+                    user_name = user
+                    user = get(members, name=user_name)
+
+        await self.bot.userinfo_embed(ctx, user)
+
+    @commands.command()
+    async def help(self, ctx, cmd: str = None):
+        if not cmd:
+            doc_commands = ""
+            for cmd in self.bot.docs.list_cmds:
+                doc_commands += f"-  `!{cmd}`\n"
+            embed = discord.Embed(
+                title=":information_source:  **Main !help menu**",
+                description="─────────────────\nBelow are a list of available commands.\n"
+                            "Use `!help <command>` for more information!\n** **",
+                color=0x3b88c3
+            )
+            embed.add_field(name="Commands", value=doc_commands)
+            embed.set_thumbnail(url=self.bot.user.avatar_url)
+        else:
+            cmd = cmd.lower().replace("!", "")
+            if cmd == "8ball":
+                cmd = "eightball"
+            elif cmd == "userinfo" or cmd == "whois":
+                cmd = "userinfo_whois"
+            embed = getattr(self.bot.docs, cmd)
+
+        embed.set_footer(
+            icon_url=self.bot.user.avatar_url,
+            text="{} - Made by {}.".format(self.bot.user, get(ctx.guild.members, id="338651890021826561"))
+        )
+        await self.bot.send_docs(ctx, embed)
 
 
 def setup(bot):

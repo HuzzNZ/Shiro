@@ -74,7 +74,7 @@ class Shiro(commands.Bot):
         self.constants = self.load_file(self.const_file)
         self.senko_guild = None
         self.channel_ids = dict
-        self.channels = namedtuple("Channel", "roles release uptime logs pins docs staff_bot")
+        self.channels = namedtuple("Channel", "roles release uptime logs pins docs staff_bot waifu_start waifu_end")
         self.role_ids = dict
         self.roles = namedtuple("Role", "kitsune member spacer_pings spacer_special "
                                         "news_server news_anime disc_anime disc_manga")
@@ -107,7 +107,7 @@ class Shiro(commands.Bot):
 
     @staticmethod
     def mention_cleanup(input_str):
-        return input_str.replace("<", "").replace("@", "").replace("!", "").replace(">", "")
+        return int(input_str.replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
 
     def has_base_roles(self, member: discord.Member):
         base_roles = [
@@ -138,7 +138,7 @@ class Shiro(commands.Bot):
 
         # Loading Channels
         self.channel_ids = self.constants["channels"]
-        Channel = namedtuple("Channel", "roles release uptime logs pins docs, staff_bot")
+        Channel = namedtuple("Channel", "roles release uptime logs pins docs, staff_bot waifu_start waifu_end")
 
         roles = self.get_channel(id=int(self.channel_ids["roles"]))
         release = self.get_channel(id=int(self.channel_ids["release"]))
@@ -147,8 +147,10 @@ class Shiro(commands.Bot):
         pins = self.get_channel(id=int(self.channel_ids["pins"]))
         docs = self.get_channel(id=int(self.channel_ids["docs"]))
         staff_bot = self.get_channel(id=int(self.channel_ids["staff-bot"]))
+        waifu_start = self.get_channel(id=int(self.channel_ids["waifu-start"]))
+        waifu_end = self.get_channel(id=int(self.channel_ids["waifu-end"]))
 
-        self.channels = Channel(roles, release, uptime, logs, pins, docs, staff_bot)
+        self.channels = Channel(roles, release, uptime, logs, pins, docs, staff_bot, waifu_start, waifu_end)
 
         # Loading Roles
 
