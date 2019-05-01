@@ -157,6 +157,7 @@ class Shiro(commands.Bot):
             json.dump(self.tracking, writefile)
 
     async def define_constants(self):
+        print(self.guilds)
         self.senko_guild = self.get_guild(int(self.constants['guild']))
 
         # Loading Channels
