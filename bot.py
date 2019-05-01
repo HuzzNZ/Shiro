@@ -880,7 +880,7 @@ class Shiro(commands.Bot):
             embed.add_field(name="User Joined At", value=join_date, inline=False)
             embed.add_field(name="Roles", value=roles_str, inline=False)
             embed.set_thumbnail(url=user.avatar_url)
-            embed.set_footer(icon_url=bot.user.avatar_url,
+            embed.set_footer(icon_url=self.user.avatar_url,
                              text="User info of {} - requested by {}".format(user, ctx.message.author))
 
             if ctx.message.channel.id == "557469450668998657" or ctx.message.channel.id == "557033330470813697":
