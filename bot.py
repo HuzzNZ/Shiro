@@ -7,7 +7,6 @@ import logging
 
 # Local Scripts
 from anilist_api import find_anime_by_id
-from anilist_api import find_manga_by_id
 from anilist_api import find_anime_by_name
 from anilist_api import find_manga_by_name
 from util import build_next_ep_embed
@@ -74,10 +73,14 @@ class Shiro(commands.Bot):
         self.constants = self.load_file(self.const_file)
         self.senko_guild = None
         self.channel_ids = dict
-        self.channels = namedtuple("Channel", "roles release uptime logs pins docs staff_bot waifu_start waifu_end")
+        self.channels = namedtuple("Channel", "roles release uptime logs pins docs staff_bot")
         self.role_ids = dict
         self.roles = namedtuple("Role", "kitsune member spacer_pings spacer_special "
-                                        "news_server news_anime disc_anime disc_manga")
+                                        "news_server news_anime disc_anime disc_manga waifu_start waifu_end muted")
+
+        # Loading Embed Colors
+        self.color_bad = 0xa22c34
+        self.color_good = 0x89af5b
 
         # Loading Pin Threshold
         self.pin_threshold = self.constants["pin_threshold"]
@@ -109,6 +112,21 @@ class Shiro(commands.Bot):
     def mention_cleanup(input_str):
         return int(input_str.replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
 
+    def basic_embed(self, is_tick: bool = True, message: str = None):
+        if is_tick:
+            color = self.color_good
+            title_prefix = ":white_check_mark:"
+        else:
+            color = self.color_bad
+            title_prefix = ":no_entry:"
+
+        embed = discord.Embed(
+            title="{}  {}".format(title_prefix, message),
+            timestamp=datetime.utcnow(),
+            color=color
+        )
+        return embed
+
     def has_base_roles(self, member: discord.Member):
         base_roles = [
             self.roles.member,
@@ -138,7 +156,7 @@ class Shiro(commands.Bot):
 
         # Loading Channels
         self.channel_ids = self.constants["channels"]
-        Channel = namedtuple("Channel", "roles release uptime logs pins docs, staff_bot waifu_start waifu_end")
+        Channel = namedtuple("Channel", "roles release uptime logs pins docs staff_bot")
 
         roles = self.get_channel(id=int(self.channel_ids["roles"]))
         release = self.get_channel(id=int(self.channel_ids["release"]))
@@ -147,16 +165,14 @@ class Shiro(commands.Bot):
         pins = self.get_channel(id=int(self.channel_ids["pins"]))
         docs = self.get_channel(id=int(self.channel_ids["docs"]))
         staff_bot = self.get_channel(id=int(self.channel_ids["staff-bot"]))
-        waifu_start = self.get_channel(id=int(self.channel_ids["waifu-start"]))
-        waifu_end = self.get_channel(id=int(self.channel_ids["waifu-end"]))
 
-        self.channels = Channel(roles, release, uptime, logs, pins, docs, staff_bot, waifu_start, waifu_end)
+        self.channels = Channel(roles, release, uptime, logs, pins, docs, staff_bot)
 
         # Loading Roles
 
         self.role_ids = self.constants["roles"]
         Role = namedtuple("Role", "kitsune member spacer_pings spacer_special "
-                                  "news_server news_anime disc_anime disc_manga")
+                                  "news_server news_anime disc_anime disc_manga waifu_start waifu_end muted")
 
         kitsune = get(self.senko_guild.roles, id=int(self.role_ids["kitsune"]))
         member = self.senko_guild.get_role(int(self.role_ids["member"]))
@@ -166,9 +182,12 @@ class Shiro(commands.Bot):
         news_anime = get(self.senko_guild.roles, id=int(self.role_ids["news-anime"]))
         disc_anime = get(self.senko_guild.roles, id=int(self.role_ids["disc-anime"]))
         disc_manga = get(self.senko_guild.roles, id=int(self.role_ids["disc-manga"]))
+        waifu_start = get(self.senko_guild.roles, id=int(self.role_ids["waifu-start"]))
+        waifu_end = get(self.senko_guild.roles, id=int(self.role_ids["waifu-end"]))
+        muted = get(self.senko_guild.roles, id=int(self.role_ids["muted"]))
 
         self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
-                          disc_manga)
+                          disc_manga, waifu_start, waifu_end, muted)
 
     # ======================== #
     #                          #
@@ -323,7 +342,7 @@ class Shiro(commands.Bot):
         except Exception as error:
             self.send_log("GRE Error", str(error))
         server_embed = discord.Embed(
-            color=0x89af5b,
+            color=self.color_good,
             title="**React below to select your roles!**",
             description="─────────────────\n:newspaper: - To Receive Pings for future Server News\n"
                         ":flag_jp: - To Receive Pings for future Anime News\n"
@@ -435,11 +454,7 @@ class Shiro(commands.Bot):
                         if not return_data:
                             self.send_log("Anime {Qry", "{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
                                           "not found!".format(message.author, to_find))
-                            embed = discord.Embed(
-                                title=":no_entry:  Title __{}__ **not found**!".format(content),
-                                timestamp=datetime.utcnow(),
-                                color=0xa22c34
-                            )
+                            embed = self.basic_embed(False, "Title __{}__ **not found**!".format(content))
                         else:
                             embed = return_data[0]
                             self.send_log("Anime {Qry", "{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
@@ -473,11 +488,7 @@ class Shiro(commands.Bot):
                         return_data = await build_small_manga_embed(data)
                         if not return_data:
                             print("not found!")
-                            embed = discord.Embed(
-                                title=":no_entry:  Title __{}__ **not found**!".format(content),
-                                timestamp=datetime.utcnow(),
-                                color=0xa22c34
-                            )
+                            embed = self.basic_embed(False, "Title __{}__ **not found**!".format(content))
                         else:
                             embed = return_data[0]
                             self.send_log("Manga [Qry", "{} - Queried \"{}\" to Anilist.co (USING BRACKETS), "
@@ -497,11 +508,8 @@ class Shiro(commands.Bot):
             try:
                 await self.process_commands(message)
             except discord.ext.commands.errors.CommandNotFound:
-                embed = discord.Embed(
-                    title=":no_entry:  Command **{}** not found!".format(message.content.split(" ")[0].replace(
-                        "!", "")),
-                    color=0xa22c34
-                )
+                embed = self.basic_embed(False, "Command **{}** not found!".format(
+                    message.content.split(" ")[0].replace("!", "")))
                 embed.set_footer(text='!help to see a list of all available commands.')
                 cmd_not_found_msg = await message.channel.send(embed=embed)
                 await cmd_not_found_msg.delete(delay=5)
@@ -681,7 +689,7 @@ class Shiro(commands.Bot):
                                 title=":pushpin:  Pinboard vote **succeeded**!",
                                 description="**{}**/**{}**".format(pin_count, self.pin_threshold),
                                 timestamp=message.created_at,
-                                color=0x89af5b
+                                color=self.color_good
                             )
                             await embed_msg.edit(embed=embed)
                             pinned = True
@@ -873,19 +881,11 @@ class Shiro(commands.Bot):
             if ctx.message.channel.id == "557469450668998657" or ctx.message.channel.id == "557033330470813697":
                 await ctx.send(embed=embed)
             else:
-                docs_sent = discord.Embed(
-                    title=":white_check_mark:  User Information **sent**!",
-                    timestamp=ctx.message.created_at,
-                    color=0x89af5b
-                )
+                docs_sent = self.basic_embed(True, "User Information **sent**!")
                 await ctx.send(embed=docs_sent)
                 await self.channels.docs.send(embed=embed, content=ctx.message.author.mention)
         else:
-            embed = discord.Embed(
-                title=":no_entry:  User **not found**!",
-                timestamp=ctx.message.created_at,
-                color=0xa22c34
-            )
+            embed = self.basic_embed(False, "User **not found**!")
             await ctx.send(embed=embed)
 
     async def send_docs(self, ctx: discord.ext.commands.Context, embed):
@@ -893,11 +893,7 @@ class Shiro(commands.Bot):
             await ctx.send(embed=embed)
 
         else:
-            docs_sent = discord.Embed(
-                title=":white_check_mark:  Documentations **sent**!",
-                timestamp=ctx.message.created_at,
-                color=0x89af5b
-            )
+            docs_sent = self.basic_embed(True, "Documentations **sent**!")
             msg = await ctx.send(embed=docs_sent)
             await self.channels.docs.send(embed=embed, content=ctx.author.mention)
             await msg.delete(delay=5)

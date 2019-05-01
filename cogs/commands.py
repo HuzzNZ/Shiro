@@ -45,21 +45,13 @@ class CmdCog(commands.Cog):
         if not get_id:
             return_data = await build_embed(data)
             if not return_data:
-                embed = discord.Embed(
-                    title=":no_entry:  Title __{}__ **not found**!".format(anime_id),
-                    timestamp=ctx.message.created_at,
-                    color=0xa22c34
-                )
+                embed = self.bot.basic_embed(False, "Title __{}__ **not found**!".format(anime_id))
             else:
                 embed = return_data[0]
             await ctx.send(embed=embed)
         else:
             if not data:
-                embed = discord.Embed(
-                    title=":no_entry:  Title __{}__ **not found**!".format(anime_id),
-                    timestamp=ctx.message.created_at,
-                    color=0xa22c34
-                )
+                embed = self.bot.basic_embed(False, "Title __{}__ **not found**!".format(anime_id))
             else:
                 embed_color = data["coverImage"]["color"]
                 if embed_color:
@@ -97,21 +89,13 @@ class CmdCog(commands.Cog):
         if not get_id:
             return_data = await build_manga_embed(data)
             if not return_data:
-                embed = discord.Embed(
-                    title=":no_entry:  Title __{}__ **not found**!".format(manga_id),
-                    timestamp=ctx.message.created_at,
-                    color=0xa22c34
-                )
+                embed = self.bot.basic_embed(False, "Title __{}__ **not found**!".format(manga_id))
             else:
                 embed = return_data[0]
             await ctx.send(embed=embed)
         else:
             if not data:
-                embed = discord.Embed(
-                    title=":no_entry:  Title __{}__ **not found**!".format(manga_id),
-                    timestamp=ctx.message.created_at,
-                    color=0xa22c34
-                )
+                embed = self.bot.basic_embed(False, "Title __{}__ **not found**!".format(manga_id))
             else:
                 embed_color = data["coverImage"]["color"]
                 if embed_color:
@@ -146,11 +130,7 @@ class CmdCog(commands.Cog):
             data = await find_anime_by_name(anime_name)
         return_data = await build_embed(data)
         if not return_data:
-            embed = discord.Embed(
-                title=":no_entry:  Title __{}__ **not found**!".format(anime_id),
-                timestamp=ctx.message.created_at,
-                color=0xa22c34
-            )
+            embed = self.bot.basic_embed(False, "Title __{}__ **not found**!".format(anime_id))
         else:
             status = data["status"]
             if status.lower() == "releasing":
@@ -161,10 +141,9 @@ class CmdCog(commands.Cog):
                     if x:
                         fetch_embed = True
                 except (IndexError, KeyError):
-                    embed = discord.Embed(
-                        title=":no_entry:  __{}__ **not currently releasing**!".format(data["title"]["romaji"]),
-                        timestamp=ctx.message.created_at,
-                        color=0xa22c34
+                    embed = self.bot.basic_embed(
+                        False, 
+                        "__{}__ **not currently releasing**!".format(data["title"]["romaji"])
                     )
         if fetch_embed:
             new_data = await build_next_ep_embed(data)
@@ -193,17 +172,12 @@ class CmdCog(commands.Cog):
             try:
                 side = int(side)
                 if side > 999999999:
-                    err_message = ":no_entry:  Number cannot be larger than **1,000,000,000**!"
+                    err_message = "Number cannot be larger than **1,000,000,000**!"
                     raise ValueError
-
             except ValueError:
                 if not err_message:
-                    err_message = ":no_entry:  **{}** is not a valid number!".format(side)
-                embed = discord.Embed(
-                    title=err_message,
-                    timestamp=ctx.message.timestamp,
-                    color=0xa22c34
-                )
+                    err_message = "**{}** is not a valid number!".format(side)
+                embed = self.bot.basic_embed(False, err_message)
                 await ctx.send(embed=embed)
                 return
         else:
@@ -306,7 +280,7 @@ class CmdCog(commands.Cog):
             embed = discord.Embed(
                 title=":no_entry:  **I don't think that's an appropriate name...**",
                 description="Try again with a different name.",
-                color=0xa22c34
+                color=self.bot.color_bad
             )
             await ctx.send(embed=embed)
             return
@@ -315,7 +289,7 @@ class CmdCog(commands.Cog):
                 embed = discord.Embed(
                     title=":no_entry:  Your waifu's name is **too long**!",
                     description="Currently **{}**/24 chars.".format(name.__len__()),
-                    color=0xa22c34
+                    color=self.bot.color_bad
                 )
                 await ctx.send(embed=embed)
                 return
@@ -342,8 +316,8 @@ class CmdCog(commands.Cog):
                     ]
                     embed = discord.Embed(
                         title=":white_check_mark:  Waifu **{}** added!".format(name),
-                        description="*{}, {}.*".format(random.choice(list_messages), ctx.message.author.mention),
-                        color=0x89af5b
+                        description="{}, {}.".format(random.choice(list_messages), ctx.message.author.mention),
+                        color=self.bot.color_good
                     )
                     await ctx.send(embed=embed)
         elif opt == "isnow" or opt == "edit" or opt == "change" or opt == "changeto":
@@ -351,7 +325,7 @@ class CmdCog(commands.Cog):
                 embed = discord.Embed(
                     title=":no_entry:  Your waifu's name is **too long**!",
                     description="Currently **{}**/24 chars.".format(name.__len__()),
-                    color=0xa22c34
+                    color=self.bot.color_bad
                 )
                 await ctx.send(embed=embed)
                 return
@@ -364,7 +338,7 @@ class CmdCog(commands.Cog):
                     embed = discord.Embed(
                         title=":no_entry:  **You don't have a waifu yet!**",
                         description="",
-                        color=0xa22c34
+                        color=self.bot.color_bad
                     )
                     embed.set_footer(text="Use !mywaifu is <name> to add her.")
                     await ctx.send(embed=embed)
@@ -381,7 +355,7 @@ class CmdCog(commands.Cog):
                     embed = discord.Embed(
                         title=":white_check_mark:  Waifu changed to **{}**!".format(name),
                         description=random.choice(list_messages).format(old_waifu),
-                        color=0x89af5b
+                        color=self.bot.color_good
                     )
                     await ctx.send(embed=embed)
         elif opt == "remove" or opt == "delete" or opt == "reset" or opt == "isnolonger":
@@ -393,7 +367,7 @@ class CmdCog(commands.Cog):
                 embed = discord.Embed(
                     title=":no_entry:  **You don't have a waifu yet!**",
                     description="",
-                    color=0xa22c34
+                    color=self.bot.color_bad
                 )
                 embed.set_footer(text="Use !mywaifu is <name> to add her.")
                 await ctx.send(embed=embed)
@@ -404,14 +378,14 @@ class CmdCog(commands.Cog):
                 embed = discord.Embed(
                     title=":white_check_mark:  Waifu **Removed**.".format(name),
                     description="Goodbye forever, {}.".format(self_waifu),
-                    color=0x89af5b
+                    color=self.bot.color_good
                 )
                 await ctx.send(embed=embed)
         else:
             embed = discord.Embed(
                 title=":no_entry:  Unknown Command!",
                 description="",
-                color=0xa22c34
+                color=self.bot.color_bad
             )
             embed.set_footer(text="Use !help mywaifu for more information.")
             await ctx.send(embed=embed)
@@ -488,7 +462,7 @@ class CmdCog(commands.Cog):
 
         embed.set_footer(
             icon_url=self.bot.user.avatar_url,
-            text="{} - Made by {}.".format(self.bot.user, get(ctx.guild.members, id="338651890021826561"))
+            text="{} - Made by {}.".format(self.bot.user, get(ctx.guild.members, id=338651890021826561))
         )
         await self.bot.send_docs(ctx, embed)
 
