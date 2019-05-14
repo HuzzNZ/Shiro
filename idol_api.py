@@ -323,7 +323,6 @@ class Idol:
         name_en = card["idol"]["name"]
         name_ja = card["idol"]["japanese_name"].replace("　", "")
         unit = card["idol"]["main_unit"]
-        school = card["idol"]["school"].split(" ")[0] + " - " + card["idol"]["year"] + " Year"
 
         footer_url = "http:" + card["round_card_image"]
         footer_text = f"{name_en} - Card ID {card['id']}"
@@ -331,8 +330,7 @@ class Idol:
 
         embed = Embed(
             color=embed_color,
-            title=":microphone:  **{}** - {}".format(name_en, unit),
-            description=f"─────────────────\n{name_en} ({name_ja})\n**{unit}**@{school}"
+            title=":microphone:  **{}** - {}".format(name_ja, unit)
         )
         embed.set_footer(icon_url=footer_url, text=footer_text)
         embed.set_image(url=card_url)

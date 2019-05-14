@@ -71,8 +71,8 @@ class Docs:
         self.userinfo_whois = None
         self.userinfo_whois_embed()
 
-        self.userinfo_idol = None
-        self.userinfo_idol_embed()
+        self.idol = None
+        self.idol_embed()
 
         self.list_cmds = [
             "anime", "manga", "nextep", "waifu", "dice", "cointoss", "8ball", "members", "mywaifu", "userinfo", "whois",
@@ -342,7 +342,7 @@ class Docs:
         cmd = Command("whois / !userinfo", subcommands)
         self.userinfo_whois = self.build_embed(cmd)
 
-    def userinfo_idol_embed(self):
+    def idol_embed(self):
         subcommands = [
             {
                 "name": "Random Love Live! Idol card by Name",
@@ -351,9 +351,8 @@ class Docs:
                     "!idol <Idol Name>"
                 ],
 
-                "function": "Returns an embed with information about an Idol, and fetches a random Love Live! School"
-                            "Idol Festival Card to be displayed. Only Members of Aqours, μ's and A-RISE are "
-                            "avaliable. (Might take a long time)"
+                "function": "Returns an embed with a random Love Live! School Idol Festival Card to be displayed. Only "
+                            "Members of Aqours, μ's and A-RISE are avaliable. (Might take a long time)"
             },
             {
                 "name": "Random Love Live! Idol card by School",
