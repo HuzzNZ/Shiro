@@ -377,7 +377,7 @@ class Docs:
         ]
 
         cmd = Command("idol", subcommands)
-        self.userinfo_idol = self.build_embed(cmd)
+        self.idol = self.build_embed(cmd)
 
 
 if __name__ == "__main__":
