@@ -6,6 +6,7 @@ from bot import Shiro
 from util import build_embed
 from util import build_manga_embed
 from util import build_next_ep_embed
+from util import build_translate_embed
 from idol_api import Idol
 
 from anilist_api import find_anime_by_id
@@ -484,6 +485,22 @@ class CmdCog(commands.Cog):
             except AttributeError:
                 embed = self.bot.basic_embed(False, "Argument not found!")
                 embed.set_footer(text="Use !help idol to get more information.")
+            await ctx.send(embed=embed)
+
+    @commands.command()
+    async def translate(self, ctx, *args):
+        async with ctx.channel.typing():
+            arg = ""
+            if args:
+                for i in args:
+                    arg += i
+                    arg += " "
+                arg = arg.strip()
+            else:
+                pass
+            embed = await build_translate_embed(arg)
+            embed.add_footer(text=f"JP >> EN | Requested by {ctx.author}")
+
             await ctx.send(embed=embed)
 
 

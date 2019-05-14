@@ -1,5 +1,7 @@
 from discord import Embed
 from datetime import datetime
+from googletrans import Translator
+import asyncio
 
 
 async def time_diff(t1, t2):
@@ -392,3 +394,22 @@ async def build_next_ep_embed(data, epoch: int = None, episode: int = None):
                     inline=False)
 
     return [embed, title]
+
+
+async def build_translate_embed(string):
+    translator = Translator()
+    result = translator.translate(string, src="ja", dest="en")
+    text = result.text
+
+    p = translator.translate(string, src="ja", dest="ja")
+    pronunciation = p.pronunciation
+    embed = Embed(
+        title=":flag_jp: **>>** :flag_gb: **Translation Results**:",
+        description="─────────────────",
+        color=0xffffff
+    )
+    embed.add_field(name="Original Text", value=string, inline=False)
+    embed.add_field(name="Original Pronunciation", value=pronunciation, inline=False)
+    embed.add_field(name="Translated Text (EN)", value=text, inline=False)
+
+    return embed
