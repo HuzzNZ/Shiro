@@ -388,8 +388,8 @@ class Docs:
                 "name": "Japanese to English",
 
                 "usages": [
-                    "!translate <Text in Japanese>",
-                    "<Text in Japanese> >>"
+                    "!translate <Text in Japanese / Romaji>",
+                    "<Text in Japanese / Romaji> >>"
                 ],
 
                 "function": "Gets the pronunciation and the meaning of the requested Japanese word/phrase/sentence."
