@@ -519,7 +519,8 @@ class Shiro(commands.Bot):
                         to_translate = msg.content
                 if to_translate:
                     embed = await build_translate_embed(to_translate)
-                    embed.set_footer(text=f"JP　>>　EN | Requested by {message.author}", icon_url=self.user.avatar_url)
+                    embed.set_footer(text=f"JP to EN Translation | Requested by {message.author}",
+                                     icon_url=self.user.avatar_url)
                     await messageable.send(embed=embed)
 
         else:

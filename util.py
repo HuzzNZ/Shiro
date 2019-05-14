@@ -404,7 +404,7 @@ async def build_translate_embed(string):
     p = translator.translate(string, src="ja", dest="ja")
     pronunciation = p.pronunciation
     embed = Embed(
-        title=":flag_jp:　**>>**　:flag_gb:　**Translation Results**:",
+        title=":flag_jp:　**>>**　:flag_gb:",
         description="─────────────────",
         color=0xffffff
     )
