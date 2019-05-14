@@ -6,6 +6,7 @@ from bot import Shiro
 from util import build_embed
 from util import build_manga_embed
 from util import build_next_ep_embed
+from idol_api import Idol
 
 from anilist_api import find_anime_by_id
 from anilist_api import find_anime_by_name
@@ -462,6 +463,13 @@ class CmdCog(commands.Cog):
             text="{} - Made by {}.".format(self.bot.user, get(ctx.guild.members, id=338651890021826561))
         )
         await self.bot.send_docs(ctx, embed)
+
+    @commands.command()
+    async def idol(self, ctx, arg):
+        async with ctx.channel.typing():
+            idol = Idol()
+            embed = await idol.get_random_embed(arg)
+            await ctx.send(embed=embed)
 
 
 def setup(bot):
