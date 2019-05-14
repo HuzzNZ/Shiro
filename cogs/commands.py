@@ -465,8 +465,19 @@ class CmdCog(commands.Cog):
         await self.bot.send_docs(ctx, embed)
 
     @commands.command()
-    async def idol(self, ctx, arg):
+    async def idol(self, ctx, *args):
         async with ctx.channel.typing():
+            arg = ""
+            if args:
+                for i in args:
+                    arg += i
+                    arg += " "
+                arg = arg.strip()
+            else:
+                embed = self.bot.basic_embed(False, "Argument not found!")
+                embed.set_footer(text="Use !help idol to get more information.")
+                await ctx.send(embed=embed)
+                return
             idol = Idol()
             try:
                 embed = await idol.get_random_embed(arg)
