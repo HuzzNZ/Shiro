@@ -499,7 +499,7 @@ class CmdCog(commands.Cog):
             else:
                 pass
             embed = await build_translate_embed(arg)
-            embed.add_footer(text=f"JP >> EN | Requested by {ctx.author}")
+            embed.set_footer(text=f"JP >> EN | Requested by {ctx.author}", icon_url=self.bot.user.avatar_url)
 
             await ctx.send(embed=embed)
 
