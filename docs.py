@@ -71,8 +71,12 @@ class Docs:
         self.userinfo_whois = None
         self.userinfo_whois_embed()
 
+        self.userinfo_idol = None
+        self.userinfo_idol_embed()
+
         self.list_cmds = [
-            "anime", "manga", "nextep", "waifu", "dice", "cointoss", "8ball", "members", "mywaifu", "userinfo", "whois"
+            "anime", "manga", "nextep", "waifu", "dice", "cointoss", "8ball", "members", "mywaifu", "userinfo", "whois",
+            "idol"
         ]
 
     def build_embed(self, cmd: Command):
@@ -337,6 +341,44 @@ class Docs:
 
         cmd = Command("whois / !userinfo", subcommands)
         self.userinfo_whois = self.build_embed(cmd)
+
+    def userinfo_idol_embed(self):
+        subcommands = [
+            {
+                "name": "Random Love Live! Idol card by Name",
+
+                "usages": [
+                    "!idol <Idol Name>"
+                ],
+
+                "function": "Returns an embed with information about an Idol, and fetches a random Love Live! School"
+                            "Idol Festival Card to be displayed. Only Members of Aqours, μ's and A-RISE are "
+                            "avaliable. (Might take a long time)"
+            },
+            {
+                "name": "Random Love Live! Idol card by School",
+
+                "usages": [
+                    "!idol <School Name>"
+                ],
+
+                "function": "Functions similarly to name command. Only Otonokizaka, and Uranohoshi are avaliable as"
+                            "options. (Will take a long time)"
+            },
+            {
+                "name": "Random Love Live! Idol card by Group",
+
+                "usages": [
+                    "!idol <Group Name>"
+                ],
+
+                "function": "Functions similarly to name command. Very Similar to school command. Only Aqours, and μ's "
+                            "are avaliable as options. (Will take a long time)"
+            },
+        ]
+
+        cmd = Command("idol", subcommands)
+        self.userinfo_idol = self.build_embed(cmd)
 
 
 if __name__ == "__main__":

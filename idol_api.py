@@ -253,6 +253,7 @@ class Idol:
             f_unit = aliases[unit]
         except KeyError:
             raise IdolSearchError("Unit Not Found")
+        self.unit = f_unit
 
     def set(self, arg):
         try:
@@ -320,7 +321,7 @@ class Idol:
 
         embed_color = 0x55acee
         name_en = card["idol"]["name"]
-        name_ja = card["idol"]["japanese_name"]
+        name_ja = card["idol"]["japanese_name"].replace("　", "")
         unit = card["idol"]["main_unit"]
         school = card["idol"]["school"].split(" ")[0] + " - " + card["idol"]["year"] + " Year"
 
@@ -331,12 +332,8 @@ class Idol:
         embed = Embed(
             color=embed_color,
             title=":microphone:  **{}** - {}".format(name_en, unit),
-            description="─────────────────\n"
+            description=f"─────────────────\n{name_en} ({name_ja})\n**{unit}**@{school}"
         )
-        embed.add_field(name="English Name", value="**{}**".format(name_en))
-        embed.add_field(name="Japanese Name", value="**{}**".format(name_ja))
-        embed.add_field(name="Idol Group", value="**{}**".format(unit), inline=False)
-        embed.add_field(name="School", value="**{}**".format(school), inline=False)
         embed.set_footer(icon_url=footer_url, text=footer_text)
         embed.set_image(url=card_url)
         return embed

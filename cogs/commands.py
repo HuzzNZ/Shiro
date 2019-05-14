@@ -468,7 +468,11 @@ class CmdCog(commands.Cog):
     async def idol(self, ctx, arg):
         async with ctx.channel.typing():
             idol = Idol()
-            embed = await idol.get_random_embed(arg)
+            try:
+                embed = await idol.get_random_embed(arg)
+            except AttributeError:
+                embed = self.bot.basic_embed(False, "Argument not found!")
+                embed.set_footer(text="Use !help idol to get more information.")
             await ctx.send(embed=embed)
 
 
