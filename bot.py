@@ -525,10 +525,11 @@ class Shiro(commands.Bot):
                 if content[notation_place - 1] == content[-4]:
                     to_translate = content[:notation_place]
             if to_translate:
-                embed = await build_translate_embed(to_translate)
-                embed.set_footer(text=f"JP to EN Translation | Requested by {message.author}",
-                                 icon_url=self.user.avatar_url)
-                await message.channel.send(embed=embed)
+                async with message.channel.typing():
+                    embed = await build_translate_embed(to_translate)
+                    embed.set_footer(text=f"JP to EN Translation | Requested by {message.author}",
+                                     icon_url=self.user.avatar_url)
+                    await message.channel.send(embed=embed)
 
         else:
             try:
