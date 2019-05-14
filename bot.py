@@ -434,7 +434,10 @@ class Shiro(commands.Bot):
                     f"link in {message.channel}: {message.content}"
                 )
             return
-        if "{" in content and "}" in content:
+        if " --Literal " or " -l " in content:
+            pass
+
+        elif "{" in content and "}" in content:
             try:
                 to_find_list = []
                 for i in range(len(content)):
@@ -511,17 +514,21 @@ class Shiro(commands.Bot):
             await self.magic8(message, question)
 
         elif ">>" in content:
+            to_translate = None
             if content == "^ >>":
-                to_translate = None
                 messageable = message.channel
                 async for msg in messageable.history(limit=2):
                     if not message == msg:
                         to_translate = msg.content
-                if to_translate:
-                    embed = await build_translate_embed(to_translate)
-                    embed.set_footer(text=f"JP to EN Translation | Requested by {message.author}",
-                                     icon_url=self.user.avatar_url)
-                    await messageable.send(embed=embed)
+            else:
+                notation_place = content.find(" >>")
+                if content[notation_place - 1] == content[-4]:
+                    to_translate = content[:notation_place]
+            if to_translate:
+                embed = await build_translate_embed(to_translate)
+                embed.set_footer(text=f"JP to EN Translation | Requested by {message.author}",
+                                 icon_url=self.user.avatar_url)
+                await message.channel.send(embed=embed)
 
         else:
             try:
