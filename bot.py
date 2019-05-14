@@ -434,7 +434,7 @@ class Shiro(commands.Bot):
                     f"link in {message.channel}: {message.content}"
                 )
             return
-        if " --Literal " or " -l " in content:
+        if " --Literal " in content or " -l " in content:
             pass
 
         elif "{" in content and "}" in content:
