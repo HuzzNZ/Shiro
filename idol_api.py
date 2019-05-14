@@ -325,12 +325,12 @@ class Idol:
         unit = card["idol"]["main_unit"]
 
         footer_url = "http:" + card["round_card_image"]
-        footer_text = f"{name_en} - Card ID {card['id']}"
+        footer_text = f"{name_ja} - Card ID {card['id']}"
         card_url = "http:" + card_url
 
         embed = Embed(
             color=embed_color,
-            title=":microphone:  **{}** - {}".format(name_ja, unit)
+            title=":microphone:  **{}** - {}".format(name_en, unit)
         )
         embed.set_footer(icon_url=footer_url, text=footer_text)
         embed.set_image(url=card_url)
