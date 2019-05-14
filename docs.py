@@ -74,9 +74,12 @@ class Docs:
         self.idol = None
         self.idol_embed()
 
+        self.translate = None
+        self.translate_embed()
+
         self.list_cmds = [
             "anime", "manga", "nextep", "waifu", "dice", "cointoss", "8ball", "members", "mywaifu", "userinfo", "whois",
-            "idol"
+            "idol", "translate"
         ]
 
     def build_embed(self, cmd: Command):
@@ -378,6 +381,23 @@ class Docs:
 
         cmd = Command("idol", subcommands)
         self.idol = self.build_embed(cmd)
+
+    def translate_embed(self):
+        subcommands = [
+            {
+                "name": "Japanese to English",
+
+                "usages": [
+                    "!translate <Text in Japanese>",
+                    "<Text in Japanese> >>"
+                ],
+
+                "function": "Gets the pronunciation and the meaning of the requested Japanese word/phrase/sentence."
+            },
+        ]
+
+        cmd = Command("translate", subcommands)
+        self.translate = self.build_embed(cmd)
 
 
 if __name__ == "__main__":

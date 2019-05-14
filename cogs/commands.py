@@ -489,15 +489,18 @@ class CmdCog(commands.Cog):
 
     @commands.command()
     async def translate(self, ctx, *args):
+        arg = ""
+        if args:
+            for i in args:
+                arg += i
+                arg += " "
+            arg = arg.strip()
+        else:
+            embed = self.bot.basic_embed(False, "Incorrect Usage!")
+            embed.set_footer(text="Use !help translate to get more information.")
+            await ctx.send(embed=embed)
+            return
         async with ctx.channel.typing():
-            arg = ""
-            if args:
-                for i in args:
-                    arg += i
-                    arg += " "
-                arg = arg.strip()
-            else:
-                pass
             embed = await build_translate_embed(arg)
             embed.set_footer(text=f"JP to EN Translation | Requested by {ctx.author}",
                              icon_url=self.bot.user.avatar_url)
