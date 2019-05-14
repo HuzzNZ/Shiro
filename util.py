@@ -404,12 +404,12 @@ async def build_translate_embed(string):
     p = translator.translate(string, src="ja", dest="ja")
     pronunciation = p.pronunciation
     embed = Embed(
-        title=":flag_jp: **>>** :flag_gb: **Translation Results**:",
+        title=":flag_jp:　**>>**　:flag_gb:　**Translation Results**:",
         description="─────────────────",
         color=0xffffff
     )
     embed.add_field(name="Original Text", value=string, inline=False)
     embed.add_field(name="Original Pronunciation", value=pronunciation, inline=False)
-    embed.add_field(name="Translated Text (EN)", value=text, inline=False)
+    embed.add_field(name="Translated Text (EN)", value=f"**{text}**", inline=False)
 
     return embed

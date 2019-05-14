@@ -12,6 +12,7 @@ from anilist_api import find_manga_by_name
 from util import build_next_ep_embed
 from util import build_small_embed
 from util import build_small_manga_embed
+from util import build_translate_embed
 from util import time_diff
 from util import strfdelta
 from docs import Docs
@@ -509,6 +510,18 @@ class Shiro(commands.Bot):
             question = question.strip()
             await self.magic8(message, question)
 
+        elif ">>" in content:
+            if content == "^ >>":
+                to_translate = None
+                messageable = message.channel
+                async for msg in messageable.history(limit=2):
+                    if not message == msg:
+                        to_translate = msg.content
+                if to_translate:
+                    embed = await build_translate_embed(to_translate)
+                    embed.set_footer(text=f"JP　>>　EN | Requested by {message.author}", icon_url=self.user.avatar_url)
+                    await messageable.send(embed=embed)
+                    
         else:
             try:
                 await self.process_commands(message)
