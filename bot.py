@@ -396,14 +396,14 @@ class Shiro(commands.Bot):
                 counter += 1
                 ticks += 1
                 await asyncio.sleep(0.5)
-                if counter % 30 == 0:
+                if counter % 50 == 0:
                     await self.refresh_presence()
                     await self.refresh()
-                if counter % 90 == 0:
-                    await self.refresh_24h()
                 if ticks % 100 == 0:
                     await self.channels.uptime.send(f":large_blue_circle: I have been up for **{ticks}** ticks.")
                     await self.refresh_roles()
+                if ticks % 600 == 0:
+                    await self.refresh_24h()
                 if counter == 7200:
                     hours += 1
                     await self.channels.uptime.send(f":large_blue_circle: **!!** I have been up for **{hours}** hours.")
