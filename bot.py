@@ -51,10 +51,10 @@ class Shiro(commands.Bot):
         self.base_path = os.path.abspath("bot.py")
 
         # Finding File Directories
-        if self.on_windows or "Shiro" in self.base_path:
+        if self.on_windows or "shiro" in self.base_path:
             in_folder = ""
         else:
-            in_folder = "Shiro"
+            in_folder = "shiro"
 
         self.const_file = self.base_path.replace("bot.py", os.path.join(in_folder, "constants.json"))
         self.track_file = self.base_path.replace("bot.py", os.path.join(in_folder, "tracking.json"))
@@ -521,7 +521,7 @@ class Shiro(commands.Bot):
                     embed = await build_translate_embed(to_translate)
                     embed.set_footer(text=f"JP　>>　EN | Requested by {message.author}", icon_url=self.user.avatar_url)
                     await messageable.send(embed=embed)
-                    
+
         else:
             try:
                 await self.process_commands(message)
