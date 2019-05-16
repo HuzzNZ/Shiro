@@ -413,6 +413,7 @@ class Shiro(commands.Bot):
     async def send_meme(self):
         reddit = Reddit(self.reddit)
         await reddit.get_random_animeme()
+        await reddit.check_for_video()
         embed = await reddit.get_embed()
         await self.channels.staff_bot.send(embed=embed)
 
@@ -441,14 +442,13 @@ class Shiro(commands.Bot):
         self.send_log("...", "Refreshing Presence")
         await self.refresh_presence()
         self.send_log("...", "!! Startup Process Finished !!")
-        self.async_wrapper_meme()  # Temp
-        schedule.every(20).minutes.at(":30").do(self.async_wrapper_meme)
         schedule.every().minute.do(self.async_wrapper_minutes)
         schedule.every().minute.at(":00").do(self.async_wrapper_embed)
         schedule.every().minute.at(":00").do(self.async_wrapper_presence)
         schedule.every(10).minutes.do(self.async_wrapper_roles)
         schedule.every().hour.at(":00").do(self.async_wrapper_24h)
         schedule.every().hour.at(":30").do(self.async_wrapper_24h)
+        schedule.every().day.at("17:00:00").do(self.async_wrapper_meme)
         while True:
             try:
                 await asyncio.sleep(0.5)

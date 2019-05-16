@@ -21,14 +21,18 @@ class Reddit:
                 break
         self.submission = random.choice(top_submissions)
 
-    async def get_embed(self):
-        s_title = self.submission.title
-        if self.submission.url:
+    async def check_for_video(self):
+        has_video = True
+        while has_video:
             s_url = self.submission.url
             if "v.redd.it" in s_url:
                 await self.get_random_animeme()
-        else:
-            s_url = None
+            else:
+                has_video = False
+
+    async def get_embed(self):
+        s_title = self.submission.title
+        s_url = self.submission.url
         s_subreddit = self.submission.subreddit
         s_author = self.submission.author
         s_author_icon = s_author.icon_img

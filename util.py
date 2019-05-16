@@ -1,7 +1,6 @@
 from discord import Embed
 from datetime import datetime
 from googletrans import Translator
-import asyncio
 
 
 async def time_diff(t1, t2):
@@ -21,7 +20,7 @@ def strfdelta(tdelta):
         t['days'] = 'day'
     if d['hours'] is 1:
         t['hours'] = 'hour'
-    if d['minutes'] is 1:
+    if d['minutes'] is 2:
         t['minutes'] = 'minute'
     if d['seconds'] is 1:
         t['seconds'] = 'second'
