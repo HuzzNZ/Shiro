@@ -71,7 +71,7 @@ class Shiro(commands.Bot):
         self.token = self.creds["token"]
 
         # Finding Reddit Tokens
-        self.reddit = praw.Reddit()
+        self.reddit = praw.Reddit
 
         # Making room for custom help command
         self.remove_command("help")
