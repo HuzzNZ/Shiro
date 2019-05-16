@@ -411,7 +411,7 @@ class Shiro(commands.Bot):
         await self.wait_until_ready()
         await self.define_constants()
         await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
-        schedule.every().minute.at(":30").do(asyncio.run_coroutine_threadsafe(self.send_meme, self.loop))
+        schedule.every().minute.at(":30").do(asyncio.run_coroutine_threadsafe(self.send_meme(), self.loop))
         self.send_log("...", "Refreshing 24h")
         await self.refresh_24h()
         self.send_log("...", "Refreshing Embeds")

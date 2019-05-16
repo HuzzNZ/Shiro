@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 class Reddit:
-    def __init__(self, reddit_instance: praw.Reddit):
+    def __init__(self, reddit_instance):
         self.reddit = reddit_instance
         self.submission = praw.models.Submission
 
