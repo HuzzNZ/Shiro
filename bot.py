@@ -446,7 +446,7 @@ class Shiro(commands.Bot):
         schedule.every().minute.do(self.async_wrapper_minutes)
         schedule.every().minute.at(":00").do(self.async_wrapper_embed)
         schedule.every().minute.at(":00").do(self.async_wrapper_presence)
-        schedule.every(10).minutes().do(self.async_wrapper_roles)
+        schedule.every(10).minutes.do(self.async_wrapper_roles)
         schedule.every().hour.at(":00").do(self.async_wrapper_24h)
         schedule.every().hour.at(":30").do(self.async_wrapper_24h)
         while True:
