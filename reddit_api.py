@@ -26,6 +26,8 @@ class Reddit:
         s_id = self.submission.id
         if self.submission.url:
             s_url = self.submission.url
+            if "v.redd.it" in s_url:
+                await self.get_random_animeme()
         else:
             s_url = None
         s_subreddit = self.submission.subreddit
@@ -36,13 +38,15 @@ class Reddit:
         s_link = self.submission.permalink
 
         title = f":closed_book:  **{s_title}** on r/{s_subreddit}"
-        desc = f"─────────────────\n:small_red_triangle:  **{s_karma}**\n:link:  **[Permalink]({s_link})**"
-        footer_text = f"Submission {s_id} by u/{s_author}"
+        desc = f"─────────────────\n:small_red_triangle:  **{s_karma}**\n:link:  " \
+            f"**[Permalink](https://reddit.com{s_link})**"
+        footer_text = f"By u/{s_author}"
 
         embed = Embed(
             title=title,
             description=desc,
-            timestamp=datetime.utcfromtimestamp(s_created_epoch)
+            timestamp=datetime.utcfromtimestamp(s_created_epoch),
+            color=0xdd2e44
         )
         embed.set_footer(text=footer_text, icon_url=s_author_icon)
         embed.set_image(url=s_url)
