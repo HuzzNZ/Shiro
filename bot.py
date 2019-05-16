@@ -212,11 +212,11 @@ class Shiro(commands.Bot):
         username = reddit_creds["username"]
 
         self.reddit = praw.Reddit(
-            client_id = client_id,
-            client_secret = client_secret,
-            password = r_password,
-            user_agent = user_agent,
-            username = username
+            client_id=client_id,
+            client_secret=client_secret,
+            password=r_password,
+            user_agent=user_agent,
+            username=username
         )
         self.send_log("...", "Logged into Reddit as {}".format(self.reddit.user.me()))
 
@@ -303,6 +303,9 @@ class Shiro(commands.Bot):
         with open(self.track_file, "w", encoding="utf-8") as wf:
             json.dump(self.tracking, wf)
 
+    def async_wrapper_24h(self):
+        asyncio.run_coroutine_threadsafe(self.refresh_24h(), self.loop)
+
     async def refresh(self):
         counter = 0
         for entry in self.tracking_msgs:
@@ -363,6 +366,9 @@ class Shiro(commands.Bot):
                 title, episode, entry_id))
             counter += 1
 
+    def async_wrapper_embed(self):
+        asyncio.run_coroutine_threadsafe(self.refresh(), self.loop)
+
     async def gen_role_embeds(self):
         try:
             message = None
@@ -394,9 +400,15 @@ class Shiro(commands.Bot):
                 await member.add_roles(self.roles.spacer_pings)
                 await member.add_roles(self.roles.member)
 
+    def async_wrapper_roles(self):
+        asyncio.run_coroutine_threadsafe(self.refresh_roles(), self.loop)
+
     async def refresh_presence(self):
         currently_playing = discord.Game(name=f"{'with {} users!'.format(len(self.senko_guild.members))}  ·  !help")
         await self.change_presence(activity=currently_playing)
+
+    def async_wrapper_presence(self):
+        asyncio.run_coroutine_threadsafe(self.refresh_presence(), self.loop)
 
     async def send_meme(self):
         reddit = Reddit(self.reddit)
@@ -407,10 +419,14 @@ class Shiro(commands.Bot):
     def async_wrapper_meme(self):
         asyncio.run_coroutine_threadsafe(self.send_meme(), self.loop)
 
+    async def send_minutes(self):
+        timedif = strfdelta(datetime.utcnow() - self.start_time)
+        await self.channels.uptime.send(f":large_blue_circle: I have been up for **{timedif}**.")
+
+    def async_wrapper_minutes(self):
+        asyncio.run_coroutine_threadsafe(self.send_minutes(), self.loop)
+
     async def on_time_loop(self):
-        hours = 0
-        counter = 0
-        ticks = 0
         await self.wait_until_ready()
         await self.define_constants()
         await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
@@ -427,25 +443,16 @@ class Shiro(commands.Bot):
         self.send_log("...", "!! Startup Process Finished !!")
         self.async_wrapper_meme()  # Temp
         schedule.every(20).minutes.at(":30").do(self.async_wrapper_meme)
+        schedule.every().minute.do(self.async_wrapper_minutes())
+        schedule.every().minute.at(":00").do(self.async_wrapper_embed())
+        schedule.every().minute.at(":00").do(self.async_wrapper_presence())
+        schedule.every(10).minutes().do(self.async_wrapper_roles())
+        schedule.every().hour.at(":00").do(self.async_wrapper_24h())
+        schedule.every().hour.at(":30").do(self.async_wrapper_24h())
         while True:
             try:
-                counter += 1
-                ticks += 1
                 await asyncio.sleep(0.5)
                 schedule.run_pending()
-                if counter % 50 == 0:
-                    await self.refresh_presence()
-                    await self.refresh()
-                if ticks % 100 == 0:
-                    await self.channels.uptime.send(f":large_blue_circle: I have been up for **{ticks}** ticks.")
-                    await self.refresh_roles()
-                if ticks % 600 == 0:
-                    await self.refresh_24h()
-                if counter == 5400:
-                    hours += 1
-                    await self.channels.uptime.send(f":large_blue_circle: **!!** I have been up for **{hours}** hours.")
-                    self.send_log("Uptime", "The bot has been up for {} hours!".format(hours))
-                    counter = 0
             except KeyboardInterrupt:
                 return
             except Exception as error:

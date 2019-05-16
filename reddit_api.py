@@ -23,7 +23,6 @@ class Reddit:
 
     async def get_embed(self):
         s_title = self.submission.title
-        s_id = self.submission.id
         if self.submission.url:
             s_url = self.submission.url
             if "v.redd.it" in s_url:
