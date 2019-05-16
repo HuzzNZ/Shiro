@@ -425,7 +425,8 @@ class Shiro(commands.Bot):
         self.send_log("...", "Refreshing Presence")
         await self.refresh_presence()
         self.send_log("...", "!! Startup Process Finished !!")
-        schedule.every(20).minute.at(":30").do(self.async_wrapper_meme)
+        self.async_wrapper_meme()  # Temp
+        schedule.every(20).minutes.at(":30").do(self.async_wrapper_meme)
         while True:
             try:
                 counter += 1
