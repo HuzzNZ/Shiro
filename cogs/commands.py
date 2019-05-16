@@ -31,12 +31,16 @@ class CmdCog(commands.Cog):
     async def anime(self, ctx, *args):
         anime_id = ""
         get_id = False
-        for i in args:
-            if i == "-id":
-                get_id = True
-            else:
-                anime_id += i
-                anime_id += " "
+        if args:
+            for i in args:
+                if i == "-id":
+                    get_id = True
+                else:
+                    anime_id += i
+                    anime_id += " "
+        else:
+            embed = self.bot.basic_embed(False, "Invalid Usage!")
+            embed.set_footer(text="Use !help anime for more information.")
         anime_id = anime_id.strip()
         try:
             anime_id = int(anime_id)
@@ -75,12 +79,16 @@ class CmdCog(commands.Cog):
     async def manga(self, ctx, *args):
         manga_id = ""
         get_id = False
-        for i in args:
-            if i == "-id":
-                get_id = True
-            else:
-                manga_id += i
-                manga_id += " "
+        if args:
+            for i in args:
+                if i == "-id":
+                    get_id = True
+                else:
+                    manga_id += i
+                    manga_id += " "
+        else:
+            embed = self.bot.basic_embed(False, "Invalid Usage!")
+            embed.set_footer(text="Use !help anime for more information.")
         manga_id = manga_id.strip()
         try:
             manga_id = int(manga_id)

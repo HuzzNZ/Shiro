@@ -9,6 +9,7 @@ import logging
 from anilist_api import find_anime_by_id
 from anilist_api import find_anime_by_name
 from anilist_api import find_manga_by_name
+from reddit_api import Reddit
 from util import build_next_ep_embed
 from util import build_small_embed
 from util import build_small_manga_embed
@@ -28,6 +29,10 @@ import random
 
 # asyncio
 import asyncio
+
+# reddit & scheduler
+import praw
+import schedule
 
 
 # Logging
@@ -62,7 +67,11 @@ class Shiro(commands.Bot):
 
         # Finding Client Token
         self.cred_file = self.base_path.replace("bot.py", os.path.join(in_folder, ".creds.json"))
-        self.token = self.load_file(self.cred_file)["token"]
+        self.creds = self.load_file(self.cred_file)
+        self.token = self.creds["token"]
+
+        # Finding Reddit Tokens
+        self.reddit = praw.Reddit()
 
         # Making room for custom help command
         self.remove_command("help")
@@ -158,7 +167,6 @@ class Shiro(commands.Bot):
             json.dump(self.tracking, writefile)
 
     async def define_constants(self):
-        print(self.guilds)
         self.senko_guild = self.get_guild(int(self.constants['guild']))
 
         # Loading Channels
@@ -176,7 +184,6 @@ class Shiro(commands.Bot):
         self.channels = Channel(roles, release, uptime, logs, pins, docs, staff_bot)
 
         # Loading Roles
-
         self.role_ids = self.constants["roles"]
         Role = namedtuple("Role", "kitsune member spacer_pings spacer_special "
                                   "news_server news_anime disc_anime disc_manga waifu_start muted")
@@ -194,6 +201,24 @@ class Shiro(commands.Bot):
 
         self.roles = Role(kitsune, member, spacer_pings, spacer_special, news_server, news_anime, disc_anime,
                           disc_manga, waifu_start, muted)
+
+        # Logging into Reddit
+        reddit_creds = self.creds["reddit"]
+
+        client_id = reddit_creds["client_id"]
+        client_secret = reddit_creds["client_secret"]
+        r_password = reddit_creds["password"]
+        user_agent = reddit_creds["user_agent"]
+        username = reddit_creds["username"]
+
+        self.reddit = praw.Reddit(
+            client_id = client_id,
+            client_secret = client_secret,
+            password = r_password,
+            user_agent = user_agent,
+            username = username
+        )
+        self.send_log("...", "Logged into Reddit as {}".format(self.reddit.user.me()))
 
     # ======================== #
     #                          #
@@ -373,6 +398,12 @@ class Shiro(commands.Bot):
         currently_playing = discord.Game(name=f"{'with {} users!'.format(len(self.senko_guild.members))}  ·  !help")
         await self.change_presence(activity=currently_playing)
 
+    async def send_meme(self):
+        reddit = Reddit(self.reddit)
+        await reddit.get_random_animeme()
+        embed = await reddit.get_embed()
+        await self.channels.staff_bot.send(embed=embed)
+
     async def on_time_loop(self):
         hours = 0
         counter = 0
@@ -380,6 +411,7 @@ class Shiro(commands.Bot):
         await self.wait_until_ready()
         await self.define_constants()
         await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
+        schedule.every().minute.at(":30").do(asyncio.run_coroutine_threadsafe(self.send_meme, self.loop))
         self.send_log("...", "Refreshing 24h")
         await self.refresh_24h()
         self.send_log("...", "Refreshing Embeds")
@@ -396,6 +428,7 @@ class Shiro(commands.Bot):
                 counter += 1
                 ticks += 1
                 await asyncio.sleep(0.5)
+                schedule.run_pending()
                 if counter % 50 == 0:
                     await self.refresh_presence()
                     await self.refresh()

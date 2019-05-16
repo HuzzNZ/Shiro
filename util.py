@@ -413,3 +413,26 @@ async def build_translate_embed(string):
     embed.add_field(name="Translated Text (EN)", value=f"**{text}**", inline=False)
 
     return embed
+
+
+async def build_reddit_embed(submission):
+    title = "**" + submission.title + "** · " + submission.subreddit.name
+    description = "─────────────────\n"
+    embed = Embed(
+
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
