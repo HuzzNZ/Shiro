@@ -414,7 +414,6 @@ class Shiro(commands.Bot):
         await self.wait_until_ready()
         await self.define_constants()
         await self.channels.uptime.send(content=":red_circle: **I have just been rebooted!**")
-        schedule.every().minute.at(":30").do(self.async_wrapper_meme)
         self.send_log("...", "Refreshing 24h")
         await self.refresh_24h()
         self.send_log("...", "Refreshing Embeds")
@@ -426,6 +425,7 @@ class Shiro(commands.Bot):
         self.send_log("...", "Refreshing Presence")
         await self.refresh_presence()
         self.send_log("...", "!! Startup Process Finished !!")
+        schedule.every(20).minute.at(":30").do(self.async_wrapper_meme)
         while True:
             try:
                 counter += 1
@@ -440,7 +440,7 @@ class Shiro(commands.Bot):
                     await self.refresh_roles()
                 if ticks % 600 == 0:
                     await self.refresh_24h()
-                if counter == 7200:
+                if counter == 5400:
                     hours += 1
                     await self.channels.uptime.send(f":large_blue_circle: **!!** I have been up for **{hours}** hours.")
                     self.send_log("Uptime", "The bot has been up for {} hours!".format(hours))
