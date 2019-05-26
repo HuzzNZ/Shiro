@@ -453,7 +453,7 @@ class Shiro(commands.Bot):
         schedule.every().day.at("10:45:00").do(self.async_wrapper_meme)
         while True:
             try:
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(5)
                 schedule.run_pending()
             except KeyboardInterrupt:
                 return
