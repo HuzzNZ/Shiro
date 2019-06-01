@@ -10,7 +10,7 @@ class Osu:
         self.api = api_key
 
         self.url_base = "https://osu.ppy.sh/api/"
-        self.avatar_url_base = "https://a.ppy.sh/{}.png"
+        self.avatar_url_base = "https://a.ppy.sh/{}"
         self.username = None
 
         self.base_path = os.path.abspath("osu_api.py")
@@ -66,11 +66,11 @@ class Osu:
         except IndexError:
             embed = Embed(
                 title=":no_entry:  **osu! Account not found!**",
-                color=0x89af5b,
+                color=0xa22c34,
                 description="─────────────────\nPlease re-check and make sure that you have the correct capitalization,"
                             " spelling and spacing of your username."
             )
-            embed.set_thumbnail(url="https://a.ppy.sh/01.png")
+            embed.set_thumbnail(url="https://a.ppy.sh/01")
             return embed
 
         u_id = response["user_id"]
