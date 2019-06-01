@@ -70,12 +70,12 @@ class Osu:
                 description="─────────────────\nPlease re-check and make sure that you have the correct capitalization,"
                             " spelling and spacing of your username."
             )
-            embed.set_image(url="https://a.ppy.sh/01.png")
+            embed.set_thumbnail(url="https://a.ppy.sh/01.png")
             return embed
 
         u_id = response["user_id"]
         u_name = response["username"]
-        u_avatar_url = self.url_base + u_id
+        u_avatar_url = self.url_base + u_id + ".png"
 
         associations_dict = self.load_associations()
         associations_dict[str(user_id)] = u_id
@@ -86,5 +86,5 @@ class Osu:
             color=0x89af5b,
             description="─────────────────\n**Username:** {}\n **User ID**: {}".format(u_name, u_id)
         )
-        embed.set_image(url=u_avatar_url)
+        embed.set_thumbnail(url=u_avatar_url)
         return embed
