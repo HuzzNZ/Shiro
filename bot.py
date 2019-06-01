@@ -99,6 +99,15 @@ class Shiro(commands.Bot):
         self.tracking = self.load_file(self.track_file)
         self.tracking_msgs = self.load_file(self.track_msg_file)
 
+        # Adding Scheduler Events
+        schedule.every().minute.do(self.async_wrapper_minutes)
+        schedule.every().minute.at(":00").do(self.async_wrapper_embed)
+        schedule.every().minute.at(":00").do(self.async_wrapper_presence)
+        schedule.every(10).minutes.do(self.async_wrapper_roles)
+        schedule.every().hour.at(":00").do(self.async_wrapper_24h)
+        schedule.every().hour.at(":30").do(self.async_wrapper_24h)
+        schedule.every().day.at("10:45:00").do(self.async_wrapper_meme)
+
         # Starting the bot
         self.send_log("Bot Client", "Starting process")
         self.ontime_loop = None
@@ -444,16 +453,9 @@ class Shiro(commands.Bot):
         self.send_log("...", "Refreshing Presence")
         await self.refresh_presence()
         self.send_log("...", "!! Startup Process Finished !!")
-        schedule.every().minute.do(self.async_wrapper_minutes)
-        schedule.every().minute.at(":00").do(self.async_wrapper_embed)
-        schedule.every().minute.at(":00").do(self.async_wrapper_presence)
-        schedule.every(10).minutes.do(self.async_wrapper_roles)
-        schedule.every().hour.at(":00").do(self.async_wrapper_24h)
-        schedule.every().hour.at(":30").do(self.async_wrapper_24h)
-        schedule.every().day.at("10:45:00").do(self.async_wrapper_meme)
         while True:
             try:
-                await asyncio.sleep(5)
+                await asyncio.sleep(0.5)
                 schedule.run_pending()
             except KeyboardInterrupt:
                 return
