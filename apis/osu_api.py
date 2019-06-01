@@ -11,7 +11,7 @@ class Osu:
 
         self.url_base = "https://osu.ppy.sh/api/"
         self.avatar_url_base = "https://a.ppy.sh/{}"
-        self.username = None
+        self.id = None
 
         self.base_path = os.path.abspath("osu_api.py")
         if "shiro/apis" in self.base_path:
@@ -35,13 +35,14 @@ class Osu:
 
     def find_user(self, user_id):
         self.load_associations()
-        self.find_user_after_load(user_id)
+        return self.find_user_after_load(user_id)
 
     def find_user_after_load(self, user_id):
         try:
-            self.username = self.associations[(str(user_id))]
+            self.id = self.associations[(str(user_id))]
+            return False
         except KeyError:
-            self.username = None
+            self.id = None
             embed = Embed(
                 title=":warning:  **Hey, you don't seem to have an osu! account associated!**",
                 color=0xffcc1b,
@@ -87,4 +88,39 @@ class Osu:
             description="─────────────────\n**Username:** {}\n **User ID**: {}".format(u_name, u_id)
         )
         embed.set_thumbnail(url=u_avatar_url)
+        return embed
+
+    async def get_user_info(self, user_id):
+        e = self.find_user(user_id)
+        if e:
+            return e
+        self.load_associations()
+        embed = await self.get_user_info_after_load(user_id)
+        return embed
+
+    async def get_user_info_after_load(self, user_id):
+        self.find_user(user_id)
+        params = {
+            "k": self.api,
+            "u": self.id,
+            "type": "id"
+        }
+
+        r = requests.get(url=self.url_base + "get_user", params=params).text
+        response = json.loads(r)[0]
+        embed = await self.build_user_embed(response)
+        return embed
+
+    @staticmethod
+    async def build_user_embed(user_dict):
+        desc_str = ""
+        for key, value in user_dict.items():
+            if key is not "events":
+                desc_str += f"{key.rjust(21, ' ')}: {value}\n"
+        embed = Embed(
+            title="this works.",
+            description="name is {}, id is {}\n\ntoo lazy rn so"
+                        "here is the raw data:\n─────────────────\n```{}```".format(
+                user_dict["username"], user_dict["user_id"], desc_str)
+        )
         return embed

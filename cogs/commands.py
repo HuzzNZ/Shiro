@@ -526,9 +526,13 @@ class CmdCog(commands.Cog):
             arg += i
             arg += " "
         arg = arg.strip()
+        embed = None
 
         if option == "set":
             embed = await osu.set_user(ctx.author.id, arg)
+
+        elif option == "me":
+            embed = await osu.get_user_info(ctx.author.id)
 
         await ctx.send(embed=embed)
 
