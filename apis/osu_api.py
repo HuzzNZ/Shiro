@@ -75,7 +75,7 @@ class Osu:
 
         u_id = response["user_id"]
         u_name = response["username"]
-        u_avatar_url = self.url_base + u_id + ".png"
+        u_avatar_url = self.avatar_url_base + u_id + ".png"
 
         associations_dict = self.load_associations()
         associations_dict[str(user_id)] = u_id
