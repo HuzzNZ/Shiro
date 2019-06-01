@@ -522,10 +522,11 @@ class CmdCog(commands.Cog):
         osu = Osu(self.bot.osu)
 
         arg = ""
-        for i in args:
-            arg += i
-            arg += " "
-        arg = arg.strip()
+        if args:
+            for i in args:
+                arg += i
+                arg += " "
+            arg = arg.strip()
         embed = None
 
         if option == "set":
