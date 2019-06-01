@@ -10,7 +10,7 @@ class Osu:
         self.api = api_key
 
         self.url_base = "https://osu.ppy.sh/api/"
-        self.avatar_url_base = "https://a.ppy.sh/"
+        self.avatar_url_base = "https://a.ppy.sh/{}.png"
         self.username = None
 
         self.base_path = os.path.abspath("osu_api.py")
@@ -75,7 +75,7 @@ class Osu:
 
         u_id = response["user_id"]
         u_name = response["username"]
-        u_avatar_url = self.avatar_url_base + u_id + ".png"
+        u_avatar_url = self.avatar_url_base.format(u_id)
 
         associations_dict = self.load_associations()
         associations_dict[str(user_id)] = u_id
