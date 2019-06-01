@@ -15,9 +15,9 @@ class Osu:
 
         self.base_path = os.path.abspath("osu_api.py")
         if "shiro/apis" in self.base_path:
-            in_folder = "apis"
+            in_folder = ""
         else:
-            in_folder = "shiro/apis"
+            in_folder = "shiro"
         self.associations_file = self.base_path.replace("osu_api.py", os.path.join(in_folder, "osu.json"))
 
         self.associations = {}
