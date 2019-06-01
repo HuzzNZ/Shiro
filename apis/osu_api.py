@@ -8,8 +8,7 @@ import os
 class Osu:
     def __init__(self, api_key):
         self.api = api_key
-        self.associations = {}
-        self.load_associations()
+
         self.url_base = "https://osu.ppy.sh/api/"
         self.avatar_url_base = "https://a.ppy.sh/"
         self.username = None
@@ -20,6 +19,9 @@ class Osu:
         else:
             in_folder = "shiro/apis"
         self.associations_file = self.base_path.replace("osu_api.py", os.path.join(in_folder, "osu.json"))
+
+        self.associations = {}
+        self.load_associations()
 
     def write_association(self, association_dict):
         with open(self.associations_file, "w", encoding="UTF-8") as file:
