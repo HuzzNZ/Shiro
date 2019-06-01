@@ -6,10 +6,10 @@ import logging
 
 
 # Local Scripts
-from anilist_api import find_anime_by_id
-from anilist_api import find_anime_by_name
-from anilist_api import find_manga_by_name
-from reddit_api import Reddit
+from apis.anilist_api import find_anime_by_id
+from apis.anilist_api import find_anime_by_name
+from apis.anilist_api import find_manga_by_name
+from apis.reddit_api import Reddit
 from util import build_next_ep_embed
 from util import build_small_embed
 from util import build_small_manga_embed
@@ -69,6 +69,7 @@ class Shiro(commands.Bot):
         self.cred_file = self.base_path.replace("bot.py", os.path.join(in_folder, ".creds.json"))
         self.creds = self.load_file(self.cred_file)
         self.token = self.creds["token"]
+        self.osu = self.creds["osu"]
 
         # Finding Reddit Tokens
         self.reddit = praw.Reddit

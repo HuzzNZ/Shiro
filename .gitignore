@@ -10,3 +10,5 @@ tracking_msg\.json
 logs/
 
 __pycache__/
+
+osu.json

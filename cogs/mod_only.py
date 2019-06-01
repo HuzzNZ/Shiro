@@ -5,7 +5,7 @@ from datetime import datetime
 
 from bot import Shiro
 from util import strfdelta
-from anilist_api import find_anime_by_id
+from apis.anilist_api import find_anime_by_id
 
 import asyncio
 

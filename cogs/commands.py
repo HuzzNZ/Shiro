@@ -7,12 +7,14 @@ from util import build_embed
 from util import build_manga_embed
 from util import build_next_ep_embed
 from util import build_translate_embed
-from idol_api import Idol
+from apis.idol_api import Idol
 
-from anilist_api import find_anime_by_id
-from anilist_api import find_anime_by_name
-from anilist_api import find_manga_by_id
-from anilist_api import find_manga_by_name
+from apis.anilist_api import find_anime_by_id
+from apis.anilist_api import find_anime_by_name
+from apis.anilist_api import find_manga_by_id
+from apis.anilist_api import find_manga_by_name
+
+from apis.osu_api import Osu
 
 from math import floor
 import math
@@ -514,6 +516,21 @@ class CmdCog(commands.Cog):
                              icon_url=self.bot.user.avatar_url)
 
             await ctx.send(embed=embed)
+
+    @commands.command()
+    async def osu(self, ctx, option, *args):
+        osu = Osu(self.bot.osu)
+
+        arg = ""
+        for i in args:
+            arg += i
+            arg += " "
+        arg = arg.strip()
+
+        if option == "set":
+            embed = await osu.set_user(ctx.author.id, arg)
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
