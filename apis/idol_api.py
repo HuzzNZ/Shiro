@@ -271,8 +271,12 @@ class Idol:
                     try:
                         self.set_year(arg)
                         return
-                    except:
-                        raise AttributeError("None of this matches anything wtf")
+                    except IdolSearchError:
+                        try:
+                            self.set_id(arg)
+                            return
+                        except:
+                            raise AttributeError("None of this matches anything wtf")
 
     async def retrieve(self, l_id: int = None):
         params = {
