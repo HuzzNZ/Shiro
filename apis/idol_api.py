@@ -278,7 +278,7 @@ class Idol:
                         except:
                             raise AttributeError("None of this matches anything wtf")
 
-    async def retrieve(self, l_id: int = None):
+    async def retrieve(self):
         params = {
             "page_size": 100
         }
@@ -291,8 +291,8 @@ class Idol:
         elif self.year:
             params["idol_year"] = self.year
         else:
-            if l_id:
-                params["ids"] = l_id
+            if self.card_id:
+                params["ids"] = self.card_id
             else:
                 return None
 
