@@ -14,7 +14,7 @@ from apis.anilist_api import find_anime_by_name
 from apis.anilist_api import find_manga_by_id
 from apis.anilist_api import find_manga_by_name
 
-from apis.osu_api import Osu
+from apis.osu_api_old import Osu
 
 from math import floor
 import math

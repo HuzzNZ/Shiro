@@ -5,122 +5,208 @@ import json
 import os
 
 
-class Osu:
+class OsuAPI:
     def __init__(self, api_key):
+        """
+        Initializes the Osu API class.
+
+        :param api_key: The API Key to use for the osu api.
+        """
         self.api = api_key
 
+        # Defining URL Bases
         self.url_base = "https://osu.ppy.sh/api/"
-        self.avatar_url_base = "https://a.ppy.sh/{}"
-        self.id = None
+        self.avatar_url_base = "https://a.ppy.sh/"
 
-        self.base_path = os.path.abspath("osu_api.py")
-        if "shiro/apis" in self.base_path:
-            in_folder = ""
+        # Setting the paths for the associations json file
+        self.base_path = os.path.abspath("osu_api_old.py")
+        if "Shiro\\apis" in self.base_path:
+            in_folder = ".."
         else:
             in_folder = "shiro"
-        self.associations_file = self.base_path.replace("osu_api.py", os.path.join(in_folder, "osu.json"))
 
-        self.associations = {}
-        self.load_associations()
+        self.associations_file = self.base_path.replace("osu_api_old.py", os.path.join(in_folder, "osu.json"))
 
-    def write_association(self, association_dict):
-        with open(self.associations_file, "w", encoding="UTF-8") as file:
-            json.dump(association_dict, file)
+        self.mods_enum = [
+            "NMD", "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "RX", "HT", "NC", "FL", "CM", "SO", "AP", "PF"
+        ]
 
-    def load_associations(self):
-        with open(self.associations_file, "r", encoding="UTF-8") as file:
-            content = json.loads(file.read())
-        self.associations = content
-        return content
+    @staticmethod
+    def build_user_not_found_embed():
+        """
+        Static Classmethod that returns a User Not Found Embed.
 
-    def find_user(self, user_id):
-        self.load_associations()
-        return self.find_user_after_load(user_id)
+        :return: discord.Embed object
+        """
+        embed = Embed(
+            title=":warning:  **Hey, you don't seem to have an osu! account associated!**",
+            color=0xffcc1b,
+        )
+        embed.set_footer(text="You can use `!osu set <osu! username>` to associate yourself with one.")
+        return embed
 
-    def find_user_after_load(self, user_id):
-        try:
-            self.id = self.associations[(str(user_id))]
-            return False
-        except KeyError:
-            self.id = None
-            embed = Embed(
-                title=":warning:  **Hey, you don't seem to have an osu! account associated!**",
-                color=0xffcc1b,
-            )
-            embed.set_footer(text="You can use `!osu set <osu! username>` to associate yourself with one.")
-            return embed
+    def build_user_set_embed(self, user_data):
+        """
+        Builds an "Association set!" discord.Embed from a user data dict.
 
-    async def set_user(self, user_id, osu_username):
-        self.load_associations()
-        x = await self.set_user_after_load(user_id, osu_username)
-        return x
-
-    async def set_user_after_load(self, user_id, osu_username):
-        params = {
-            "k": self.api,
-            "u": osu_username,
-            "type": "string"}
-
-        r = requests.get(url=self.url_base + "get_user", params=params).text
-        try:
-            response = json.loads(r)[0]
-        except IndexError:
-            embed = Embed(
-                title=":no_entry:  **osu! Account not found!**",
-                color=0xa22c34,
-                description="─────────────────\nPlease re-check and make sure that you have the correct capitalization,"
-                            " spelling and spacing of your username."
-            )
-            embed.set_thumbnail(url="https://a.ppy.sh/01")
-            return embed
-
-        u_id = response["user_id"]
-        u_name = response["username"]
-        u_avatar_url = self.avatar_url_base.format(u_id)
-
-        associations_dict = self.load_associations()
-        associations_dict[str(user_id)] = u_id
-        self.write_association(associations_dict)
+        :param user_data: The User Data dict, formatted the same as the osu API returns from /get_user
+        :return: an Embed
+        """
+        user_id = user_data["user_id"]
+        user_name = user_data["username"]
+        user_avatar_url = self.avatar_url_base + user_id
 
         embed = Embed(
             title=":white_check_mark:  **osu! Association set!**",
             color=0x89af5b,
-            description="─────────────────\n**Username:** {}\n **User ID**: {}".format(u_name, u_id)
+            description="─────────────────\n**osu! Username:** {}\n **osu! User ID**: {}".format(user_name, user_id)
         )
-        embed.set_thumbnail(url=u_avatar_url)
+        embed.set_thumbnail(url=user_avatar_url)
         return embed
 
-    async def get_user_info(self, user_id):
-        e = self.find_user(user_id)
-        if e:
-            return e
-        self.load_associations()
-        embed = await self.get_user_info_after_load(user_id)
+    def build_user_invalid_embed(self):
+        """
+        Builds an embed for when an osu account cannot be found with a specified osu! ID or username.
+
+        :return: discord.Embed object
+        """
+        embed = Embed(
+            title=":no_entry:  **osu! Account not found!**",
+            color=0xa22c34,
+            description="─────────────────\nPlease re-check and make sure that you have the correct capitalization,"
+                        " spelling and spacing of your username."
+        )
+        embed.set_thumbnail(url=self.avatar_url_base + "01")
         return embed
 
-    async def get_user_info_after_load(self, user_id):
-        self.find_user(user_id)
+    def bitwise_mods_to_str(self, bitwise_flag):
+        """
+        Converts osu bitwise enum mods to String Representation.
+
+        :param bitwise_flag: A 16-bit bitwise flag for mods. Should be Int
+        :return: The String Representation of the bitwise flag.
+        """
+        binary_flag = "{0:016b}".format(int(bitwise_flag))
+        mods_list = []
+        mods = ""
+
+        for i in range(0, 16):
+            if binary_flag[i] == 0:
+                continue
+            else:
+                mods_list.append(i)
+
+        if not mods_list:
+            return "No Mod"
+        else:
+            for mod in mods_list:
+                mods += self.mods_enum[mod]
+
+        if "NC" in mods:
+            mods = mods.replace("DT", "")
+        if "PF" in mods:
+            mods = mods.replace("SD", "")
+        return mods
+
+    def find_association(self, discord_user_id):
+        """
+        Finds an osu user association associated with a specified Discord ID.
+
+        :param discord_user_id: The 18-digit Discord Snowflake ID
+        :return: String osu ID, or an User Not Found Embed (discord.Embed object)
+        """
+        with open(self.associations_file, "r", encoding="UTF-8") as file:
+            content = json.loads(file.read())
+        try:
+            osu_id = content[str(discord_user_id)]
+            if osu_id:
+                return osu_id
+            else:
+                return self.build_user_not_found_embed()
+        except KeyError:  # If no associations found, return UNF Embed
+            return self.build_user_not_found_embed()
+
+    def create_association(self, discord_user_id,  osu_user):
+        """
+        Creates an association between a specified discord ID and an osu user ID (from the osu username).
+
+        :param discord_user_id: The 18-digit Discord Snowflake ID
+        :param osu_user: String osu Username / ID (auto detection)
+        :return: An "Association Set!" discord.Embed if successful, False if osu ID not found
+        """
         params = {
             "k": self.api,
-            "u": self.id,
-            "type": "id"
+            "u": osu_user
         }
 
-        r = requests.get(url=self.url_base + "get_user", params=params).text
-        response = json.loads(r)[0]
-        embed = await self.build_user_embed(response)
-        return embed
+        response = requests.get(url=self.url_base + "get_user", params=params).text
+        response_json = json.loads(response)
+        try:
+            user = response_json[0]
+        except IndexError:
+            return False
 
-    @staticmethod
-    async def build_user_embed(user_dict):
-        desc_str = ""
-        for key, value in user_dict.items():
-            if key is not "events":
-                desc_str += f"{key.rjust(21, ' ')}: {value}\n"
-        embed = Embed(
-            title="this works.",
-            description="name is {}, id is {}\n\ntoo lazy rn so"
-                        "here is the raw data:\n─────────────────\n```{}```".format(
-                user_dict["username"], user_dict["user_id"], desc_str)
-        )
-        return embed
+        if user:
+            with open(self.associations_file, "r+", encoding="UTF-8") as file:
+                content = json.loads(file.read())
+                content[str(discord_user_id)] = user["user_id"]
+                json.dump(content, file)
+            return self.build_user_set_embed(user)
+
+    async def get_user_top5(self, osu_id):
+        url = "get_user_best"
+        params = {
+            "k": self.api,
+            "u": osu_id,
+            "type": "id",
+            "limit": 5
+        }
+        response = requests.get(url=self.url_base + url, params=params)
+        data = json.loads(response)
+
+        params_u = {
+            "k": self.api,
+            "u": osu_id,
+            "type": "id"
+        }
+        response_u = requests.get(url=self.url_base + "get_user", params=params_u)
+        data_u = json.loads(response_u)
+
+        username = data_u["username"]
+        for score in data:
+            beatmap = await self.get_raw_beatmap_difficulty_data(osu_id)
+            song_name = beatmap["title"]
+            song_diff = beatmap["version"]
+            song_star = beatmap["difficultyrating"]
+            song_combo = beatmap["max_combo"]
+            diff_mods = self.bitwise_mods_to_str(score["enabled_mods"])
+            diff_score = score["score"]
+            diff_combo = score["maxcombo"]
+            acc_distrib = "[{}/{}/{}/{}]".format(
+                score["count300"], score["count100"], score["count50"], score["countmiss"])
+
+
+
+    async def get_user_recent(self, osu_id):
+        pass
+
+    async def get_user_profile(self, osu_id):
+        pass
+
+    async def get_raw_beatmap_difficulty_data(self, beatmap_id):
+        """
+        Returns raw data of a specific beatmap difficulty.
+
+        :param beatmap_id: String beatmap_id of a specified difficulty.
+        :return: Raw Data of the specified beatmap difficulty.
+        """
+        url = "get_beatmaps"
+        params = {
+            "k": self.api,
+            "b": beatmap_id
+        }
+        response = requests.get(url=self.url_base + url, params=params).text
+        return json.loads(response)[0]
+
+
+osu = OsuAPI("abcd")
